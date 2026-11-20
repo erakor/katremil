@@ -29,7 +29,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       lang="en"
       className={`${fraunces.variable} ${jakarta.variable} ${plexMono.variable} antialiased`}
     >
-      <body className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">{children}</body>
+      <body className="min-h-screen">{children}</body>
     </html>
   )
 }

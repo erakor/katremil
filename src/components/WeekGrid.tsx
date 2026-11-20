@@ -2,9 +2,10 @@
 
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { WEEKS_PER_ROW } from '@/lib/dates'
+import { SLATE_400 } from '@/lib/palette'
 import type { EventIndex, RowData, Timeline } from '@/lib/timeline'
 import type { Config, Density, Highlight, LifeEvent, Milestone } from '@/lib/types'
-import { GridRow } from './GridRow'
+import { GridRow, HATCH } from './GridRow'
 import { WeekInspector } from './WeekInspector'
 import { Panel } from './ui/Panel'
 import { Segmented } from './ui/Segmented'
@@ -287,9 +288,8 @@ export function WeekGrid({
           <i
             className="inline-block h-3 w-3 rounded-sm"
             style={{
-              backgroundColor: '#94A3B8',
-              backgroundImage:
-                'repeating-linear-gradient(135deg, rgba(15,23,42,.6) 0 1px, transparent 1px 3px)',
+              backgroundColor: SLATE_400,
+              backgroundImage: HATCH,
             }}
           />{' '}
           Passed (hatched)

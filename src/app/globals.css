@@ -1,10 +1,13 @@
 @import 'tailwindcss';
 
-@theme inline {
+@theme static {
   --color-canvas: #f8fafc;
   --color-panel: #ffffff;
   --color-ink: #0f172a;
   --color-lapis: #1d4ed8;
+}
+
+@theme inline {
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
@@ -15,8 +18,8 @@ html {
 }
 
 body {
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--color-canvas);
+  color: var(--color-ink);
   font-family: var(--font-sans);
 }
 
@@ -30,7 +33,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid #1d4ed8;
+  outline: 2px solid var(--color-lapis);
   outline-offset: 2px;
 }
 
@@ -50,7 +53,7 @@ body {
   border-radius: 1px;
 }
 .cell:focus-visible {
-  outline: 2px solid #0f172a;
+  outline: 2px solid var(--color-ink);
   outline-offset: 1px;
   z-index: 3;
 }
@@ -58,12 +61,12 @@ body {
   opacity: 0.2;
 }
 .cell-current {
-  outline: 2px solid #1d4ed8;
+  outline: 2px solid var(--color-lapis);
   outline-offset: 1px;
   z-index: 2;
 }
 .cell-current:focus-visible {
-  outline-color: #0f172a;
+  outline-color: var(--color-ink);
 }
 .ms-diamond {
   position: absolute;
@@ -72,8 +75,8 @@ body {
   width: 62%;
   aspect-ratio: 1 / 1;
   transform: translate(-50%, -50%) rotate(45deg);
-  background: #ffffff;
-  border: 1.5px solid #0f172a;
+  background: var(--color-panel);
+  border: 1.5px solid var(--color-ink);
   pointer-events: none;
 }
 .cell-flash {
@@ -83,7 +86,7 @@ body {
 @keyframes cell-flash {
   0%,
   60% {
-    outline: 3px solid #1d4ed8;
+    outline: 3px solid var(--color-lapis);
     outline-offset: 3px;
   }
   100% {

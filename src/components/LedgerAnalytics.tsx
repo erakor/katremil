@@ -12,7 +12,8 @@ import {
   YAxis,
 } from 'recharts'
 import { Plus } from 'lucide-react'
-import { fmtInt } from '@/lib/dates'
+import { WEEKS_PER_ROW, fmtInt } from '@/lib/dates'
+import { INK, LAPIS, SLATE_200, SLATE_500, SLATE_600 } from '@/lib/palette'
 import { aggregate, weekIndexForDate, inGrid } from '@/lib/timeline'
 import type { EventIndex, Group, Timeline } from '@/lib/timeline'
 import type { Milestone } from '@/lib/types'
@@ -61,7 +62,7 @@ export default function LedgerAnalytics({
   const [metric, setMetric] = useState<Metric>('active')
   const [by, setBy] = useState<By>('year')
   const groups = useMemo(() => aggregate(tl, evIdx, by), [tl, evIdx, by])
-  const size = by === 'year' ? 52 : 520
+  const size = by === 'year' ? WEEKS_PER_ROW : WEEKS_PER_ROW * 10
 
   const groupAt = (idx: number) => groups[Math.min(groups.length - 1, Math.floor(idx / size))]
   const nowGroup = inGrid(tl, tl.todayIdx) ? groupAt(tl.todayIdx) : null
@@ -147,38 +148,38 @@ export default function LedgerAnalytics({
           >
             <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <AreaChart data={groups} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                <CartesianGrid stroke="#E2E8F0" vertical={false} />
+                <CartesianGrid stroke={SLATE_200} vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fontSize: 11, fontFamily: 'var(--font-plex-mono)', fill: '#64748B' }}
+                  tick={{ fontSize: 11, fontFamily: 'var(--font-plex-mono)', fill: SLATE_500 }}
                   interval="preserveStartEnd"
                   minTickGap={24}
                 />
                 <YAxis
                   allowDecimals={false}
-                  tick={{ fontSize: 11, fontFamily: 'var(--font-plex-mono)', fill: '#64748B' }}
+                  tick={{ fontSize: 11, fontFamily: 'var(--font-plex-mono)', fill: SLATE_500 }}
                   width={36}
                 />
                 <Tooltip content={<ChartTip metric={metric} />} />
                 <Area
                   type="monotone"
                   dataKey={metric}
-                  stroke="#1D4ED8"
+                  stroke={LAPIS}
                   strokeWidth={2}
-                  fill="#1D4ED8"
+                  fill={LAPIS}
                   fillOpacity={0.15}
                   isAnimationActive={false}
                 />
                 {nowGroup && (
                   <ReferenceLine
                     x={nowGroup.label}
-                    stroke="#0F172A"
+                    stroke={INK}
                     strokeDasharray="4 3"
                     label={{
                       value: 'Now',
                       position: 'insideTopRight',
                       fontSize: 11,
-                      fill: '#0F172A',
+                      fill: INK,
                     }}
                   />
                 )}
@@ -186,13 +187,13 @@ export default function LedgerAnalytics({
                   <ReferenceLine
                     key={l.id}
                     x={l.label}
-                    stroke="#64748B"
+                    stroke={SLATE_500}
                     strokeDasharray="2 3"
                     label={{
                       value: l.title,
                       position: 'insideTopLeft',
                       fontSize: 10,
-                      fill: '#475569',
+                      fill: SLATE_600,
                     }}
                   />
                 ))}

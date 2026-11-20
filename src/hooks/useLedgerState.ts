@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
-import { todayISO, weekId, mondayOf } from '@/lib/dates'
+import { TOTAL_WEEKS, todayISO, weekId, mondayOf } from '@/lib/dates'
 import { loadState, saveState } from '@/lib/storage'
 import type { Config, LifeEvent, Milestone, Persisted, TimelineMode } from '@/lib/types'
 
@@ -14,7 +14,7 @@ export interface LedgerState {
   milestones: Milestone[]
 }
 
-type Action =
+export type Action =
   | { type: 'HYDRATE'; today: string; data: Persisted | null }
   | { type: 'TODAY'; today: string }
   | { type: 'SET_MODE'; mode: TimelineMode }
@@ -31,7 +31,7 @@ type Action =
   | { type: 'DELETE_MILESTONE'; id: string }
   | { type: 'IMPORT'; data: Persisted }
 
-const initial: LedgerState = {
+export const initial: LedgerState = {
   hydrated: false,
   today: '',
   config: {
@@ -46,19 +46,18 @@ const initial: LedgerState = {
   milestones: [],
 }
 
-export const newId = () =>
-  Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4)
+export const newId = () => crypto.randomUUID()
 
 /** Weeks from the birth week up to (not including) the current week, as absolute ids. */
 function elapsedIds(birth: string, today: string): number[] {
   const from = weekId(mondayOf(birth))
   const to = weekId(today)
   const ids: number[] = []
-  for (let id = Math.max(from, to - 4000); id < to; id++) ids.push(id)
+  for (let id = Math.max(from, to - TOTAL_WEEKS); id < to; id++) ids.push(id)
   return ids
 }
 
-function reducer(s: LedgerState, a: Action): LedgerState {
+export function reducer(s: LedgerState, a: Action): LedgerState {
   switch (a.type) {
     case 'HYDRATE': {
       const d = a.data
