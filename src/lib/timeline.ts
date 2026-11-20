@@ -88,8 +88,14 @@ export interface EventIndex {
   perEvent: Record<string, { weeks: number; raw: number }>
 }
 
-export function eventRawRange(tl: Timeline, ev: { start: string; end: string }): [number, number] {
-  return [weekIndexForDate(tl, ev.start), weekIndexForDate(tl, ev.end)]
+/** Effective end date: ongoing events (no end) run through today, or their start if later. */
+export function eventEnd(ev: { start: string; end?: string }, today: string): string {
+  if (ev.end) return ev.end
+  return today > ev.start ? today : ev.start
+}
+
+export function eventRawRange(tl: Timeline, ev: { start: string; end?: string }): [number, number] {
+  return [weekIndexForDate(tl, ev.start), weekIndexForDate(tl, eventEnd(ev, tl.today))]
 }
 
 export function computeEventIndex(tl: Timeline, events: LifeEvent[]): EventIndex {

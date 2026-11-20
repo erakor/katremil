@@ -12,7 +12,7 @@ import {
   isValidISO,
 } from '@/lib/dates'
 import { newId } from '@/hooks/useLedgerState'
-import { eventRawRange } from '@/lib/timeline'
+import { eventEnd, eventRawRange } from '@/lib/timeline'
 import type { EventIndex, Timeline } from '@/lib/timeline'
 import { MARKER_COLORS, colorHex } from '@/lib/types'
 import type { LifeEvent, MarkerColor } from '@/lib/types'
@@ -59,6 +59,7 @@ export function EventManager({
   const [title, setTitle] = useState('')
   const [start, setStart] = useState(today)
   const [end, setEnd] = useState(addDays(today, 89))
+  const [ongoing, setOngoing] = useState(false)
   const [color, setColor] = useState<MarkerColor>('lapis')
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
@@ -70,10 +71,14 @@ export function EventManager({
     titleRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
   }, [focusSignal])
 
-  const valid = isValidISO(start) && isValidISO(end) && end >= start
-  const [a, b] = valid ? eventRawRange(tl, { start, end }) : [0, -1]
+  const valid = isValidISO(start) && (ongoing ? start <= today : isValidISO(end) && end >= start)
+  const invalidMsg = ongoing
+    ? 'An ongoing event must start today or earlier.'
+    : 'End must be on or after start.'
+  const draft = { start, end: ongoing ? undefined : end }
+  const [a, b] = valid ? eventRawRange(tl, draft) : [0, -1]
   const weeks = Math.max(0, b - a + 1)
-  const days = valid ? daysBetween(start, end) + 1 : 0
+  const days = valid ? daysBetween(start, eventEnd(draft, today)) + 1 : 0
 
   const reset = () => {
     setEditing(null)
@@ -82,14 +87,26 @@ export function EventManager({
     setError('')
     setStart(today)
     setEnd(addDays(today, 89))
+    setOngoing(false)
     setColor(MARKER_COLORS[events.length % MARKER_COLORS.length].key)
   }
 
   const submit = (ev: React.FormEvent) => {
     ev.preventDefault()
     if (!title.trim()) return setError('Give the event a title.')
-    if (!valid) return setError('Choose a valid start and an end on or after it.')
-    const patch = { title: title.trim(), start, end, color, note: note.trim() || undefined }
+    if (!valid)
+      return setError(
+        ongoing
+          ? 'Choose a start date of today or earlier.'
+          : 'Choose a valid start and an end on or after it.',
+      )
+    const patch = {
+      title: title.trim(),
+      start,
+      end: ongoing ? undefined : end,
+      color,
+      note: note.trim() || undefined,
+    }
     if (editing) onUpdate(editing, patch)
     else onAdd({ id: newId(), visible: true, ...patch })
     reset()
@@ -99,7 +116,8 @@ export function EventManager({
     setEditing(e.id)
     setTitle(e.title)
     setStart(e.start)
-    setEnd(e.end)
+    setEnd(e.end ?? addDays(e.start > today ? e.start : today, 89))
+    setOngoing(!e.end)
     setColor(e.color)
     setNote(e.note ?? '')
     setError('')
@@ -133,6 +151,7 @@ export function EventManager({
               type="date"
               className={`${input} num`}
               value={start}
+              max={ongoing ? today : undefined}
               onChange={(e) => setStart(e.target.value)}
             />
           </div>
@@ -140,23 +159,39 @@ export function EventManager({
             <label htmlFor="ev-end" className={labelCls}>
               End
             </label>
-            <input
-              id="ev-end"
-              type="date"
-              className={`${input} num`}
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-            />
+            {ongoing ? (
+              <input
+                id="ev-end"
+                type="text"
+                className={`${input} num`}
+                value="Present"
+                readOnly
+                aria-readonly
+              />
+            ) : (
+              <input
+                id="ev-end"
+                type="date"
+                className={`${input} num`}
+                value={end}
+                onChange={(e) => setEnd(e.target.value)}
+              />
+            )}
           </div>
         </div>
+        <label className="flex items-center gap-2 text-xs text-slate-700">
+          <input type="checkbox" checked={ongoing} onChange={(e) => setOngoing(e.target.checked)} />
+          Ongoing (no end date yet)
+        </label>
         <p className="num text-xs text-slate-600" aria-live="polite">
           {valid ? (
             <>
+              {ongoing && 'So far: '}
               {fmtInt(days)} days · {fmtInt(weeks)} wks · {((weeks / TOTAL_WEEKS) * 100).toFixed(2)}
               % of 4,000
             </>
           ) : (
-            'End must be on or after start.'
+            invalidMsg
           )}
         </p>
         <fieldset>
@@ -218,6 +253,7 @@ export function EventManager({
                 setTitle(t.title)
                 setStart(today)
                 setEnd(t.end(today))
+                setOngoing(false)
                 setError('')
                 titleRef.current?.focus()
               }}
@@ -257,7 +293,7 @@ export function EventManager({
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{e.title}</p>
                     <p className="num text-xs text-slate-500">
-                      {formatDate(e.start)} to {formatDate(e.end)}
+                      {formatDate(e.start)} to {e.end ? formatDate(e.end) : 'present'}
                     </p>
                     <p className="num text-xs text-slate-500">
                       {fmtInt(info.raw)} wks · {((info.raw / TOTAL_WEEKS) * 100).toFixed(2)}% of

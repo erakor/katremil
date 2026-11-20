@@ -29,7 +29,8 @@ export interface LifeEvent {
   id: string
   title: string
   start: string
-  end: string
+  /** Omitted for ongoing events, which run through the current week. */
+  end?: string
   color: MarkerColor
   note?: string
   visible: boolean
