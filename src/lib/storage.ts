@@ -42,8 +42,7 @@ export function validate(raw: unknown): Result {
       typeof e.id !== 'string' ||
       typeof e.title !== 'string' ||
       !isValidISO(e.start) ||
-      !isValidISO(e.end) ||
-      e.end < e.start ||
+      (e.end !== undefined && (!isValidISO(e.end) || (e.end as string) < (e.start as string))) ||
       !COLOR_KEYS.includes(e.color as string) ||
       typeof e.visible !== 'boolean' ||
       (e.note !== undefined && typeof e.note !== 'string')
@@ -54,7 +53,7 @@ export function validate(raw: unknown): Result {
       id: e.id,
       title: e.title,
       start: e.start,
-      end: e.end,
+      end: e.end as string | undefined,
       color: e.color as LifeEvent['color'],
       note: e.note as string | undefined,
       visible: e.visible,
