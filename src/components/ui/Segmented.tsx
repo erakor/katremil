@@ -23,6 +23,7 @@ export function Segmented<T extends string>({
 }) {
   return (
     <div
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- button group; fieldset would add default border and legend semantics
       role="group"
       aria-label={ariaLabel}
       className={`${full ? 'flex w-full' : 'inline-flex'} rounded-md border border-slate-300 bg-slate-100 p-0.5`}

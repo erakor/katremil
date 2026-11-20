@@ -2,9 +2,11 @@
 
 import { memo } from 'react'
 import { WEEKS_PER_ROW } from '@/lib/dates'
+import { SLATE_400 } from '@/lib/palette'
 import type { CellData, RowData } from '@/lib/timeline'
 
-const HATCH = 'repeating-linear-gradient(135deg, rgba(15,23,42,.6) 0 1px, transparent 1px 3px)'
+export const HATCH =
+  'repeating-linear-gradient(135deg, rgba(15,23,42,.6) 0 1px, transparent 1px 3px)'
 const SHADE = 'linear-gradient(rgba(15,23,42,.3), rgba(15,23,42,.3))'
 
 function cellImage(c: CellData): string | undefined {
@@ -17,7 +19,8 @@ function cellImage(c: CellData): string | undefined {
       .join(', ')
     base = `linear-gradient(135deg, ${stops})`
   }
-  if (c.passed) return `${HATCH}, ${SHADE}, ${base ?? 'linear-gradient(#94A3B8, #94A3B8)'}`
+  if (c.passed)
+    return `${HATCH}, ${SHADE}, ${base ?? `linear-gradient(${SLATE_400}, ${SLATE_400})`}`
   return base
 }
 
@@ -35,6 +38,7 @@ function GridRowImpl({ data, decade, focusCol, showRail, flash }: Props) {
   const showLabel = data.index % 5 === 0
   return (
     <div
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- CSS-grid ARIA grid, not a table
       role="row"
       aria-rowindex={data.index + 1}
       className={`flex items-center gap-2 ${decade ? 'decade-sep' : ''} ${flash ? 'row-flash' : ''}`}
@@ -54,6 +58,7 @@ function GridRowImpl({ data, decade, focusCol, showRail, flash }: Props) {
           return (
             <div
               key={col}
+              // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- CSS-grid ARIA grid, not a table
               role="gridcell"
               data-week={first + col}
               tabIndex={col === focusCol ? 0 : -1}

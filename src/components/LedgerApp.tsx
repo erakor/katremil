@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { toPersisted, useLedgerState } from '@/hooks/useLedgerState'
+import { WEEKS_PER_ROW } from '@/lib/dates'
 import { buildRows, buildTimeline, computeEventIndex, computeMilestoneIndex } from '@/lib/timeline'
 import { EventManager } from './EventManager'
 import { LedgerSidebar } from './LedgerSidebar'
@@ -77,7 +78,7 @@ function Ledger({
   }, [])
 
   const locate = useCallback((idx: number) => {
-    const row = Math.floor(idx / 52)
+    const row = Math.floor(idx / WEEKS_PER_ROW)
     const el = document.querySelector<HTMLElement>(`[data-week="${idx}"]`)
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     el?.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' })

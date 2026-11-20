@@ -60,6 +60,9 @@ export function validate(raw: unknown): Result {
     })
   }
 
+  if (new Set(events.map((e) => e.id)).size !== events.length)
+    return { ok: false, error: 'Two events share an id.' }
+
   if (!Array.isArray(raw.milestones) || raw.milestones.length > 1000)
     return { ok: false, error: 'Invalid milestones list.' }
   const milestones: Milestone[] = []
@@ -75,6 +78,9 @@ export function validate(raw: unknown): Result {
     }
     milestones.push({ id: m.id, title: m.title, date: m.date, visible: m.visible })
   }
+
+  if (new Set(milestones.map((m) => m.id)).size !== milestones.length)
+    return { ok: false, error: 'Two milestones share an id.' }
 
   return {
     ok: true,

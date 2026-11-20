@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Four Thousand Weeks
 
-## Getting Started
+A life ledger. It lays out roughly four thousand weeks, the length of a long human life, as a
+grid: mark the weeks behind you, map projects and chapters onto the ones ahead, and pin the
+milestones that matter.
 
-First, run the development server:
+## Using it
+
+- **Timeline mode.** _Horizon_ shows 4,000 weeks from any start date. _Birth · Full_ starts at
+  your birth week; _Birth · Remaining_ shows only the weeks still ahead.
+- **Weeks.** Click or drag across the grid to mark weeks as passed. _Sync Elapsed to Today_
+  marks everything before the current week. Arrow keys move between weeks.
+- **Events** cover a date range and get a color. **Milestones** are single dates.
+- **Analytics** charts how many events are active per year or decade.
+
+## Your data
+
+Everything stays in your browser's `localStorage` under the key `ftw:v1`. Nothing is sent
+anywhere, so clearing site data or switching browsers starts you over. Use **Export** to save a
+JSON backup and **Import** to restore one. Import asks before replacing the current ledger and
+offers an undo afterwards.
+
+The export is the `Persisted` shape in `src/lib/types.ts`. Passed weeks are stored as absolute week
+numbers (Mondays counted from 1970-01-05), so they survive changes to the mode or start date. All
+date math runs on UTC calendar dates, so a week never shifts with the viewer's time zone or
+daylight saving.
+
+## Development
+
+Requires Node 26 and pnpm 12 (see `.nvmrc` and `packageManager`).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```bash
+pnpm dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script           | What it does                                                  |
+| ---------------- | ------------------------------------------------------------- |
+| `pnpm dev`       | Dev server on http://localhost:3000                           |
+| `pnpm build`     | Production build (the app is fully static)                    |
+| `pnpm test`      | Unit tests (Vitest): dates, storage validation, state reducer |
+| `pnpm typecheck` | Generates Next's route types, then runs `tsc`                 |
+| `pnpm lint`      | oxlint, failing on warnings                                   |
+| `pnpm format`    | oxfmt; `pnpm format:check` only reports                       |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Lint, format and TypeScript settings come from
+[`erakor/toolchain`](https://github.com/erakor/toolchain), which also provides the CI checks in
+`.github/workflows/checks.yml`. Change shared settings there, not here.
 
-## Learn More
+### Layout
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/lib/`: pure logic. `dates.ts` (UTC calendar math), `timeline.ts` (grid layout and event
+  indexing), `storage.ts` (persistence and import validation).
+- `src/hooks/useLedgerState.ts`: the app state reducer, hydration and debounced saving.
+- `src/components/`: the UI. `LedgerApp.tsx` wires it together.

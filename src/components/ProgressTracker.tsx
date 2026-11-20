@@ -85,6 +85,7 @@ export function ProgressTracker({
 
         <div className="relative mt-5 pb-3 pt-3">
           <div
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- custom-styled bar with markers that <progress> cannot render
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}

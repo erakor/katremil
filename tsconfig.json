@@ -2,7 +2,6 @@
   "extends": "@erakor/toolchain/tsconfig/react.json",
   "compilerOptions": {
     "allowJs": true,
-    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
