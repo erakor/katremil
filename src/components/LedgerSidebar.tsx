@@ -1,17 +1,17 @@
-"use client";
+'use client'
 
-import { Segmented } from "./ui/Segmented";
+import { Segmented } from './ui/Segmented'
 
-export type SidebarTab = "events" | "milestones";
+export type SidebarTab = 'events' | 'milestones'
 
 export function LedgerSidebar({
   tab,
   onTab,
   children,
 }: {
-  tab: SidebarTab;
-  onTab: (t: SidebarTab) => void;
-  children: React.ReactNode;
+  tab: SidebarTab
+  onTab: (t: SidebarTab) => void
+  children: React.ReactNode
 }) {
   return (
     <aside
@@ -26,12 +26,12 @@ export function LedgerSidebar({
           value={tab}
           onChange={onTab}
           options={[
-            { value: "events", label: "Life Events" },
-            { value: "milestones", label: "Milestones" },
+            { value: 'events', label: 'Life Events' },
+            { value: 'milestones', label: 'Milestones' },
           ]}
         />
       </div>
       {children}
     </aside>
-  );
+  )
 }

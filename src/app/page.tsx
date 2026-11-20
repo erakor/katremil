@@ -1,5 +1,5 @@
-import { LedgerApp } from "@/components/LedgerApp";
+import { LedgerApp } from '@/components/LedgerApp'
 
 export default function Home() {
-  return <LedgerApp />;
+  return <LedgerApp />
 }

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "oxlint --deny-warnings",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "lucide-react": "^1.77.0",
@@ -16,12 +19,13 @@
     "recharts": "^3.11.0"
   },
   "devDependencies": {
+    "@erakor/toolchain": "github:erakor/toolchain#v1.4.0",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.4.6",
+    "oxfmt": "^0.79.0",
+    "oxlint": "^1.94.0",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
   }

@@ -1,0 +1,7 @@
+{
+  "extends": ["./node_modules/@erakor/toolchain/oxlint/react.json"],
+  "ignorePatterns": [".next/**", "next-env.d.ts"],
+  "rules": {
+    "jsx-a11y/prefer-tag-over-role": "off"
+  }
+}

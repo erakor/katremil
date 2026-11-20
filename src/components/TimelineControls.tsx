@@ -1,13 +1,13 @@
-"use client";
+'use client'
 
-import { useRef, useState } from "react";
-import { Download, RefreshCw, Trash2, Upload } from "lucide-react";
-import { mondayOf, weekId } from "@/lib/dates";
-import { exportState, readImportFile } from "@/lib/storage";
-import type { Timeline } from "@/lib/timeline";
-import type { Config, Persisted, TimelineMode } from "@/lib/types";
-import { Panel, btn, input, labelCls } from "./ui/Panel";
-import { Segmented } from "./ui/Segmented";
+import { useRef, useState } from 'react'
+import { Download, RefreshCw, Trash2, Upload } from 'lucide-react'
+import { mondayOf, weekId } from '@/lib/dates'
+import { exportState, readImportFile } from '@/lib/storage'
+import type { Timeline } from '@/lib/timeline'
+import type { Config, Persisted, TimelineMode } from '@/lib/types'
+import { Panel, btn, input, labelCls } from './ui/Panel'
+import { Segmented } from './ui/Segmented'
 
 export function TimelineControls({
   config,
@@ -19,25 +19,25 @@ export function TimelineControls({
   onClear,
   onImport,
 }: {
-  config: Config;
-  tl: Timeline;
-  getPersisted: () => Persisted;
-  onMode: (m: TimelineMode) => void;
-  onAnchor: (d: string) => void;
-  onSync: (fromId: number, toId: number) => void;
-  onClear: () => void;
-  onImport: (p: Persisted) => void;
+  config: Config
+  tl: Timeline
+  getPersisted: () => Persisted
+  onMode: (m: TimelineMode) => void
+  onAnchor: (d: string) => void
+  onSync: (fromId: number, toId: number) => void
+  onClear: () => void
+  onImport: (p: Persisted) => void
 }) {
-  const [confirming, setConfirming] = useState(false);
-  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const birth = config.mode !== "horizon";
+  const [confirming, setConfirming] = useState(false)
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const birth = config.mode !== 'horizon'
 
   const sync = () => {
-    const from = birth ? weekId(mondayOf(tl.anchor)) : tl.startWeekId;
-    onSync(from, weekId(tl.today));
-    setMsg({ kind: "ok", text: "Marked every week before this one as passed." });
-  };
+    const from = birth ? weekId(mondayOf(tl.anchor)) : tl.startWeekId
+    onSync(from, weekId(tl.today))
+    setMsg({ kind: 'ok', text: 'Marked every week before this one as passed.' })
+  }
 
   return (
     <Panel className="p-4">
@@ -49,15 +49,19 @@ export function TimelineControls({
             value={config.mode}
             onChange={onMode}
             options={[
-              { value: "horizon", label: "Horizon", title: "4,000 weeks starting from a date" },
-              { value: "birthFull", label: "Birth · Full", title: "4,000 weeks from your birth" },
-              { value: "birthRemaining", label: "Birth · Remaining", title: "Only the weeks you have left" },
+              { value: 'horizon', label: 'Horizon', title: '4,000 weeks starting from a date' },
+              { value: 'birthFull', label: 'Birth · Full', title: '4,000 weeks from your birth' },
+              {
+                value: 'birthRemaining',
+                label: 'Birth · Remaining',
+                title: 'Only the weeks you have left',
+              },
             ]}
           />
         </div>
         <div>
           <label htmlFor="anchor-date" className={labelCls}>
-            {birth ? "Birth date" : "Start date"}
+            {birth ? 'Birth date' : 'Start date'}
           </label>
           <input
             id="anchor-date"
@@ -80,9 +84,9 @@ export function TimelineControls({
                 type="button"
                 className="font-semibold underline"
                 onClick={() => {
-                  onClear();
-                  setConfirming(false);
-                  setMsg({ kind: "ok", text: "Passed weeks cleared." });
+                  onClear()
+                  setConfirming(false)
+                  setMsg({ kind: 'ok', text: 'Passed weeks cleared.' })
                 }}
               >
                 Confirm
@@ -96,7 +100,11 @@ export function TimelineControls({
               <Trash2 size={14} aria-hidden /> Clear Passed
             </button>
           )}
-          <button type="button" className={btn} onClick={() => exportState(getPersisted(), tl.today)}>
+          <button
+            type="button"
+            className={btn}
+            onClick={() => exportState(getPersisted(), tl.today)}
+          >
             <Download size={14} aria-hidden /> Export
           </button>
           <button type="button" className={btn} onClick={() => fileRef.current?.click()}>
@@ -110,25 +118,32 @@ export function TimelineControls({
             aria-label="Import ledger JSON file"
             data-testid="import-input"
             onChange={async (e) => {
-              const file = e.target.files?.[0];
-              e.target.value = "";
-              if (!file) return;
-              const res = await readImportFile(file);
+              const file = e.target.files?.[0]
+              e.target.value = ''
+              if (!file) return
+              const res = await readImportFile(file)
               if (res.ok) {
-                onImport(res.data);
-                setMsg({ kind: "ok", text: `Imported ${res.data.events.length} events and ${res.data.milestones.length} milestones.` });
-              } else setMsg({ kind: "err", text: `Import failed: ${res.error}` });
+                onImport(res.data)
+                setMsg({
+                  kind: 'ok',
+                  text: `Imported ${res.data.events.length} events and ${res.data.milestones.length} milestones.`,
+                })
+              } else setMsg({ kind: 'err', text: `Import failed: ${res.error}` })
             }}
           />
         </div>
       </div>
-      {birth && <p className="mt-2 text-xs text-slate-500">Birth modes count weeks from the Monday of your birth week.</p>}
+      {birth && (
+        <p className="mt-2 text-xs text-slate-500">
+          Birth modes count weeks from the Monday of your birth week.
+        </p>
+      )}
       <p
-        role={msg?.kind === "err" ? "alert" : "status"}
-        className={`mt-2 min-h-4 text-xs ${msg?.kind === "err" ? "text-rose-700" : "text-slate-600"}`}
+        role={msg?.kind === 'err' ? 'alert' : 'status'}
+        className={`mt-2 min-h-4 text-xs ${msg?.kind === 'err' ? 'text-rose-700' : 'text-slate-600'}`}
       >
         {msg?.text}
       </p>
     </Panel>
-  );
+  )
 }
