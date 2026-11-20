@@ -71,7 +71,10 @@ export function EventManager({
     titleRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
   }, [focusSignal])
 
-  const valid = isValidISO(start) && (ongoing || (isValidISO(end) && end >= start))
+  const valid = isValidISO(start) && (ongoing ? start <= today : isValidISO(end) && end >= start)
+  const invalidMsg = ongoing
+    ? 'An ongoing event must start today or earlier.'
+    : 'End must be on or after start.'
   const draft = { start, end: ongoing ? undefined : end }
   const [a, b] = valid ? eventRawRange(tl, draft) : [0, -1]
   const weeks = Math.max(0, b - a + 1)
@@ -93,7 +96,9 @@ export function EventManager({
     if (!title.trim()) return setError('Give the event a title.')
     if (!valid)
       return setError(
-        ongoing ? 'Choose a valid start date.' : 'Choose a valid start and an end on or after it.',
+        ongoing
+          ? 'Choose a start date of today or earlier.'
+          : 'Choose a valid start and an end on or after it.',
       )
     const patch = {
       title: title.trim(),
@@ -146,6 +151,7 @@ export function EventManager({
               type="date"
               className={`${input} num`}
               value={start}
+              max={ongoing ? today : undefined}
               onChange={(e) => setStart(e.target.value)}
             />
           </div>
@@ -185,7 +191,7 @@ export function EventManager({
               % of 4,000
             </>
           ) : (
-            'End must be on or after start.'
+            invalidMsg
           )}
         </p>
         <fieldset>
