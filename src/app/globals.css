@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-canvas: #f8fafc;
+  --color-panel: #ffffff;
+  --color-ink: #0f172a;
+  --color-lapis: #1d4ed8;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: var(--font-sans);
+}
+
+[id] {
+  scroll-margin-top: 5rem;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+/* ---- week grid ---- */
+.cell {
+  scroll-margin-top: 9rem;
+  scroll-margin-bottom: 2rem;
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 2px;
+  background-color: #e2e8f0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.grid-compact .cell {
+  aspect-ratio: 1 / 0.62;
+  border-radius: 1px;
+}
+.cell:focus-visible {
+  outline: 2px solid #0f172a;
+  outline-offset: 1px;
+  z-index: 3;
+}
+.cell-dim {
+  opacity: 0.2;
+}
+.cell-current {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 1px;
+  z-index: 2;
+}
+.cell-current:focus-visible {
+  outline-color: #0f172a;
+}
+.ms-diamond {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 62%;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: #ffffff;
+  border: 1.5px solid #0f172a;
+  pointer-events: none;
+}
+.cell-flash {
+  animation: cell-flash 1.6s ease-out;
+  z-index: 4;
+}
+@keyframes cell-flash {
+  0%,
+  60% {
+    outline: 3px solid #1d4ed8;
+    outline-offset: 3px;
+  }
+  100% {
+    outline: 3px solid transparent;
+    outline-offset: 6px;
+  }
+}
+.row-flash {
+  animation: row-flash 1.8s ease-out;
+}
+@keyframes row-flash {
+  0%,
+  60% {
+    background-color: #dbeafe;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+.decade-sep {
+  border-top: 1px dashed #94a3b8;
+  margin-top: 4px;
+  padding-top: 4px;
+}
+.select-none-grid {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
