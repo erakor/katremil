@@ -35,6 +35,7 @@ function GridRowImpl({ data, decade, focusCol, showRail, flash }: Props) {
   const showLabel = data.index % 5 === 0
   return (
     <div
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- CSS-grid ARIA grid, not a table
       role="row"
       aria-rowindex={data.index + 1}
       className={`flex items-center gap-2 ${decade ? 'decade-sep' : ''} ${flash ? 'row-flash' : ''}`}
@@ -54,6 +55,7 @@ function GridRowImpl({ data, decade, focusCol, showRail, flash }: Props) {
           return (
             <div
               key={col}
+              // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- CSS-grid ARIA grid, not a table
               role="gridcell"
               data-week={first + col}
               tabIndex={col === focusCol ? 0 : -1}

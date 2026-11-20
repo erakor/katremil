@@ -267,6 +267,7 @@ export function EventManager({
                     <div className="mt-2 flex items-center gap-2">
                       <div
                         className="h-1.5 flex-1 overflow-hidden rounded-sm bg-slate-200"
+                        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- custom-styled bar; <progress> styling is not portable
                         role="progressbar"
                         aria-label={`${e.title} progress`}
                         aria-valuenow={Math.round(pct)}

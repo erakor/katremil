@@ -141,6 +141,7 @@ export default function LedgerAnalytics({
           </div>
           <div
             className="h-72 w-full px-2 py-4"
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- wraps a Recharts SVG, not a raster image
             role="img"
             aria-label={`Area chart of ${metric === 'active' ? 'active weeks' : 'peak concurrency'} per ${by}`}
           >

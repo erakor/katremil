@@ -226,10 +226,10 @@ export function WeekGrid({
         />
       </div>
       <div className="overflow-x-auto px-3 pb-4 pt-3 sm:px-4">
+        {/* oxlint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the cells (GridRow) */}
         <div
           ref={gridRef}
           role="grid"
-          tabIndex={-1}
           aria-label="Life in weeks"
           aria-rowcount={tl.rows}
           aria-colcount={WEEKS_PER_ROW}
