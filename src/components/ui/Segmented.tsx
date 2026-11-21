@@ -26,7 +26,7 @@ export function Segmented<T extends string>({
       // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- button group; fieldset would add default border and legend semantics
       role="group"
       aria-label={ariaLabel}
-      className={`${full ? 'flex w-full' : 'inline-flex'} rounded-md border border-slate-300 bg-slate-100 p-0.5`}
+      className={`${full ? 'flex w-full' : 'inline-flex'} rounded-md border border-hairline bg-white/[0.03] p-0.5`}
     >
       {options.map((o) => {
         const on = o.value === value
@@ -37,8 +37,8 @@ export function Segmented<T extends string>({
             aria-pressed={on}
             title={o.title}
             onClick={() => onChange(o.value)}
-            className={`${full ? 'flex-1' : ''} rounded px-2.5 py-1 text-sm font-medium transition-colors ${
-              on ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            className={`${full ? 'flex-1' : ''} rounded px-2.5 py-1 text-sm font-medium whitespace-nowrap transition-colors ${
+              on ? 'bg-white/10 text-ink' : 'text-muted hover:text-ink'
             }`}
           >
             {o.label}

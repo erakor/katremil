@@ -1,20 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { btn, btnPrimary } from '@/components/ui/Panel'
-import { STORAGE_KEY } from '@/lib/storage'
+import { clearCustom, readRaw } from '@/lib/storage'
 
-function readSaved(): string | null {
-  try {
-    return localStorage.getItem(STORAGE_KEY)
-  } catch {
-    return null
-  }
-}
+const btn =
+  'rounded-md border border-hairline px-3 py-1.5 text-sm text-ink transition-colors hover:bg-white/5'
 
-export default function LedgerError({ error, retry }: { error: unknown; retry: () => void }) {
+export default function VisualizerError({ error, retry }: { error: unknown; retry: () => void }) {
   const [confirming, setConfirming] = useState(false)
-  const saved = readSaved()
+  const saved = readRaw()
 
   useEffect(() => {
     console.error(error)
@@ -31,23 +25,19 @@ export default function LedgerError({ error, retry }: { error: unknown; retry: (
   }
 
   const reset = () => {
-    try {
-      localStorage.removeItem(STORAGE_KEY)
-    } catch {
-      /* nothing to clear */
-    }
+    clearCustom()
     location.reload()
   }
 
   return (
     <main className="mx-auto max-w-lg space-y-4 px-4 py-16">
       <h1 className="font-display text-2xl">Something went wrong</h1>
-      <p className="text-sm text-slate-600">
-        The ledger could not be shown. Try again first. If it keeps failing, your saved data may be
+      <p className="text-sm text-muted">
+        The grid could not be drawn. Try again first. If it keeps failing, your saved life may be
         the cause: download a copy, then clear it to start fresh.
       </p>
       <div className="flex flex-wrap gap-2">
-        <button type="button" className={btnPrimary} onClick={retry}>
+        <button type="button" className={`${btn} border-amber text-amber`} onClick={retry}>
           Try again
         </button>
         {saved && (

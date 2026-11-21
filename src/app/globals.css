@@ -1,10 +1,12 @@
 @import 'tailwindcss';
 
 @theme static {
-  --color-canvas: #f8fafc;
-  --color-panel: #ffffff;
-  --color-ink: #0f172a;
-  --color-lapis: #1d4ed8;
+  --color-bg: #11141b;
+  --color-panel: #161a23;
+  --color-hairline: rgb(255 255 255 / 0.08);
+  --color-ink: #ece6da;
+  --color-muted: #8f93a0;
+  --color-amber: #f2b544;
 }
 
 @theme inline {
@@ -14,17 +16,13 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 body {
-  background: var(--color-canvas);
+  background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
-}
-
-[id] {
-  scroll-margin-top: 5rem;
 }
 
 .num {
@@ -33,99 +31,40 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-lapis);
+  outline: 2px solid var(--color-amber);
   outline-offset: 2px;
 }
 
-/* ---- week grid ---- */
-.cell {
-  scroll-margin-top: 9rem;
-  scroll-margin-bottom: 2rem;
-  position: relative;
-  aspect-ratio: 1 / 1;
-  border-radius: 2px;
-  background-color: #e2e8f0;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-.grid-compact .cell {
-  aspect-ratio: 1 / 0.62;
-  border-radius: 1px;
-}
-.cell:focus-visible {
-  outline: 2px solid var(--color-ink);
-  outline-offset: 1px;
-  z-index: 3;
-}
-.cell-dim {
-  opacity: 0.2;
-}
-.cell-current {
-  outline: 2px solid var(--color-lapis);
-  outline-offset: 1px;
-  z-index: 2;
-}
-.cell-current:focus-visible {
-  outline-color: var(--color-ink);
-}
-.ms-diamond {
+/* Soft glow over the current week. Only this element animates. */
+.pulse {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 62%;
-  aspect-ratio: 1 / 1;
-  transform: translate(-50%, -50%) rotate(45deg);
-  background: var(--color-panel);
-  border: 1.5px solid var(--color-ink);
   pointer-events: none;
+  border-radius: 2px;
+  box-shadow: 0 0 10px 2px rgb(242 181 68 / 0.55);
+  animation: pulse 2.8s ease-in-out infinite;
 }
-.cell-flash {
-  animation: cell-flash 1.6s ease-out;
-  z-index: 4;
-}
-@keyframes cell-flash {
+
+@keyframes pulse {
   0%,
-  60% {
-    outline: 3px solid var(--color-lapis);
-    outline-offset: 3px;
-  }
   100% {
-    outline: 3px solid transparent;
-    outline-offset: 6px;
+    opacity: 0.15;
   }
-}
-.row-flash {
-  animation: row-flash 1.8s ease-out;
-}
-@keyframes row-flash {
-  0%,
-  60% {
-    background-color: #dbeafe;
+  50% {
+    opacity: 0.9;
   }
-  100% {
-    background-color: transparent;
-  }
-}
-.decade-sep {
-  border-top: 1px dashed #94a3b8;
-  margin-top: 4px;
-  padding-top: 4px;
-}
-.select-none-grid {
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  .pulse {
+    animation: none;
+    opacity: 0.5;
   }
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+}
+
+input[type='range'] {
+  accent-color: var(--color-amber);
+}
+
+input[type='date'] {
+  color-scheme: dark;
 }

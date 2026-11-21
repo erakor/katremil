@@ -18,7 +18,7 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: 'Four Thousand Weeks',
   description:
-    'A life ledger: see your roughly four thousand weeks, mark the ones behind you, and plan the ones ahead.',
+    'Roughly four thousand weeks, drawn as one grid. A quiet way to see how long a life is, and what a stretch of it really weighs.',
 }
 
 export const viewport: Viewport = { width: 'device-width', initialScale: 1 }

@@ -3,7 +3,7 @@ import type { NextConfig } from 'next'
 const isDev = process.env.NODE_ENV === 'development'
 
 // The app makes no outside requests: fonts are self-hosted by next/font and data stays in
-// localStorage. Inline scripts and styles come from Next's bootstrap and Recharts.
+// localStorage. Inline scripts and styles come from Next's bootstrap.
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
