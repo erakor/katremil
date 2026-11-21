@@ -1,8 +1,8 @@
-import { formatDate, fmtInt } from './dates'
+import { fmtInt, formatDate } from './dates'
 import { COLS, TOTAL, cellDateAt, colOf, rowOf } from './life'
 import type { Chapter } from './life'
 import type { StampMath } from './stamps'
-import { awakeUnclaimedWeeks } from './xray'
+import { FROSTED_ROWS, awakeUnclaimedWeeks } from './xray'
 import type { XrayFlags } from './xray'
 
 export interface Readout {
@@ -69,7 +69,7 @@ function xrayCopy(i: ReadoutInput): Readout | null {
   }
   return {
     lead: 'The first few years are mostly gone from memory.',
-    detail: `${fmtInt(3 * COLS)} wk · ${pct(((3 * COLS) / TOTAL) * 100)}% of the grid`,
+    detail: `${fmtInt(FROSTED_ROWS * COLS)} wk · ${pct(((FROSTED_ROWS * COLS) / TOTAL) * 100)}% of the grid`,
   }
 }
 

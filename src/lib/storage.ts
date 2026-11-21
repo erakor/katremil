@@ -41,7 +41,7 @@ export function validateLife(raw: unknown): Life | null {
 
 export function loadCustom(): Life | null {
   try {
-    const text = localStorage.getItem(STORAGE_KEY)
+    const text = readRaw()
     return text ? validateLife(JSON.parse(text)) : null
   } catch {
     return null

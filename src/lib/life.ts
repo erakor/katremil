@@ -42,10 +42,6 @@ export function currentCell(birthISO: string, today: string): number {
   return row * COLS + Math.max(0, col)
 }
 
-export function ageAt(birthISO: string, dateISO: string): number {
-  return daysBetween(birthISO, dateISO) / 365.2425
-}
-
 function allCellDates(birthISO: string): string[] {
   const out = Array.from<string>({ length: TOTAL })
   for (let r = 0; r < ROWS; r++) {

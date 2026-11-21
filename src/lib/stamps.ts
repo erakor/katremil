@@ -1,4 +1,4 @@
-import { COLS, TOTAL } from './life'
+import { TOTAL } from './life'
 import { feltShare } from './warp'
 
 export interface StampDef {
@@ -58,5 +58,3 @@ export function stampMath(
     equivalence: equivalence(n, chapters),
   }
 }
-
-export const stampAge = (anchor: number) => Math.floor(anchor / COLS)

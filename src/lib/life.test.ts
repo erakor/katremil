@@ -3,7 +3,6 @@ import { addWeeks, addYears } from './dates'
 import {
   COLS,
   TOTAL,
-  ageAt,
   cellDate,
   chapterIndexForCells,
   chapterWeeks,
@@ -41,10 +40,6 @@ describe('cells and dates', () => {
       expect(cur % COLS).toBeGreaterThan(15)
       expect(cur % COLS).toBeLessThan(25)
     }
-  })
-
-  it('computes age in years', () => {
-    expect(ageAt('2000-01-01', '2010-01-01')).toBeCloseTo(10, 1)
   })
 })
 

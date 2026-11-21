@@ -7,7 +7,7 @@ import { LifeCanvas } from '@/components/LifeCanvas'
 import { NarrativeReadout } from '@/components/NarrativeReadout'
 import { Sidebar } from '@/components/Sidebar'
 import type { Lens } from '@/components/Sidebar'
-import { addYears, todayISO } from '@/lib/dates'
+import { todayISO } from '@/lib/dates'
 import { TOTAL, chapterIndexForCells, chapterWeeks, currentCell, lastWeekCells } from '@/lib/life'
 import type { Chapter, Life } from '@/lib/life'
 import { readout } from '@/lib/narrative'
@@ -283,7 +283,7 @@ export function Visualizer() {
         personaId={s.personaId}
         onPersona={onPersona}
         birthISO={life.birthISO}
-        maxBirthISO={addYears(today, 0)}
+        maxBirthISO={today}
         onBirth={(iso) => dispatch({ type: 'life', life: { ...life, birthISO: iso } })}
       />
       <div className="grid flex-1 lg:grid-cols-[7fr_3fr]">

@@ -1,3 +1,4 @@
+import { fmtInt } from './dates'
 import { COLS, TOTAL } from './life'
 
 export interface Preset {
@@ -83,6 +84,6 @@ export function summary(cells: number[], current: number, noun: string): TimesSu
       ? 'Nothing is counted at this setting.'
       : future === 0
         ? `No ${noun} are left at this pace.`
-        : `About ${future.toLocaleString('en-US')} ${noun} left, if the pace holds.`
+        : `About ${fmtInt(future)} ${noun} left, if the pace holds.`
   return { past, future, total, pctBehind, takeaway }
 }
