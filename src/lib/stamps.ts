@@ -51,7 +51,7 @@ export function stampMath(
   const cells = Math.max(0, Math.min(n, TOTAL - anchor))
   return {
     cells,
-    pctOfGrid: (n / TOTAL) * 100,
+    pctOfGrid: (cells / TOTAL) * 100,
     pctOfLifeAtAge: Math.min(100, (n / Math.max(anchor, 1)) * 100),
     pctOfLifeToday: Math.min(100, (n / Math.max(current, 1)) * 100),
     felt: feltShare(anchor, cells) * 100,

@@ -27,7 +27,7 @@ export function ChapterEditor({
     onChange([
       ...chapters,
       {
-        id: `c${Date.now().toString(36)}`,
+        id: crypto.randomUUID(),
         label: 'New chapter',
         startISO: start,
         pigment: PIGMENTS[chapters.length % PIGMENTS.length].key,
@@ -57,8 +57,16 @@ export function ChapterEditor({
                 <input
                   type="date"
                   value={c.startISO}
+                  max={c.endISO}
                   onChange={(e) =>
-                    isValidISO(e.target.value) && patch(c.id, { startISO: e.target.value })
+                    isValidISO(e.target.value) &&
+                    patch(c.id, {
+                      startISO: e.target.value,
+                      // Keep the chapter valid: a start past the end drags the end along.
+                      ...(c.endISO !== undefined && c.endISO < e.target.value
+                        ? { endISO: e.target.value }
+                        : {}),
+                    })
                   }
                   className={field}
                 />
@@ -71,7 +79,9 @@ export function ChapterEditor({
                   disabled={c.endISO === undefined}
                   min={c.startISO}
                   onChange={(e) =>
-                    isValidISO(e.target.value) && patch(c.id, { endISO: e.target.value })
+                    isValidISO(e.target.value) &&
+                    e.target.value >= c.startISO &&
+                    patch(c.id, { endISO: e.target.value })
                   }
                   className={`${field} disabled:opacity-40`}
                 />

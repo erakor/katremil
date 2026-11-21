@@ -1,10 +1,12 @@
 import { isValidISO } from './dates'
 import type { Chapter, Life } from './life'
 import { isPigmentKey } from './pigments'
+import type { PigmentKey } from './pigments'
 
 // Only a custom life is ever saved. Sample personas are derived from today and never stored.
-// The old ledger format (`ftw:v1`) is deliberately ignored.
+// An old ledger (`ftw:v1`) is migrated on first load when no v2 life exists yet.
 export const STORAGE_KEY = 'ftw:v2'
+const LEGACY_KEY = 'ftw:v1'
 
 const MAX_CHAPTERS = 40
 
@@ -26,7 +28,9 @@ export function validateLife(raw: unknown): Life | null {
       !isPigmentKey(c.pigment)
     )
       return null
-    if (c.endISO !== undefined && (!isValidISO(c.endISO) || c.endISO < c.startISO)) return null
+    if (c.endISO !== undefined && !isValidISO(c.endISO)) return null
+    // An end before the start drops that one chapter rather than the whole life.
+    if (c.endISO !== undefined && c.endISO < c.startISO) continue
     chapters.push({
       id: c.id,
       label: c.label,
@@ -42,10 +46,44 @@ export function validateLife(raw: unknown): Life | null {
 export function loadCustom(): Life | null {
   try {
     const text = readRaw()
-    return text ? validateLife(JSON.parse(text)) : null
+    if (text) return validateLife(JSON.parse(text))
+    const legacy = localStorage.getItem(LEGACY_KEY)
+    return legacy ? migrateV1(JSON.parse(legacy)) : null
   } catch {
     return null
   }
+}
+
+const LEGACY_COLORS: Record<string, PigmentKey> = {
+  lapis: 'slate',
+  emerald: 'sage',
+  amber: 'ochre',
+  rose: 'terracotta',
+  violet: 'plum',
+  cyan: 'teal',
+}
+
+/**
+ * Brings an old ledger forward: its birth date and events become a custom life. Only the
+ * birth modes carry a birth date; a horizon-mode ledger has none to map, so it is skipped.
+ * The v1 entry itself is left in place.
+ */
+export function migrateV1(raw: unknown): Life | null {
+  if (!isObj(raw) || raw.version !== 1 || !isObj(raw.config) || !Array.isArray(raw.events))
+    return null
+  const { mode, anchorDate } = raw.config
+  if (mode !== 'birthFull' && mode !== 'birthRemaining') return null
+  const chapters = raw.events
+    .filter(isObj)
+    .slice(0, MAX_CHAPTERS)
+    .map((e) => ({
+      id: e.id,
+      label: typeof e.title === 'string' ? e.title.slice(0, 80) : e.title,
+      startISO: e.start,
+      endISO: e.end,
+      pigment: LEGACY_COLORS[e.color as string] ?? 'slate',
+    }))
+  return validateLife({ birthISO: anchorDate, chapters })
 }
 
 export function saveCustom(life: Life): void {

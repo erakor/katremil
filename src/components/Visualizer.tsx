@@ -117,7 +117,15 @@ function reducer(s: State, a: Action): State {
 
 // Server render and hydration both see this fixed date; the real day replaces it right after.
 const SERVER_TODAY = '2026-01-01'
-const noopSubscribe = () => () => {}
+// Re-read the date when the tab comes back (e.g. left open overnight).
+const subscribeToday = (onChange: () => void) => {
+  window.addEventListener('focus', onChange)
+  document.addEventListener('visibilitychange', onChange)
+  return () => {
+    window.removeEventListener('focus', onChange)
+    document.removeEventListener('visibilitychange', onChange)
+  }
+}
 
 function isTypingTarget(t: EventTarget | null): boolean {
   if (!(t instanceof HTMLElement)) return false
@@ -127,7 +135,7 @@ function isTypingTarget(t: EventTarget | null): boolean {
 }
 
 export function Visualizer() {
-  const today = useSyncExternalStore(noopSubscribe, todayISO, () => SERVER_TODAY)
+  const today = useSyncExternalStore(subscribeToday, todayISO, () => SERVER_TODAY)
   const [s, dispatch] = useReducer(reducer, initial)
 
   // A saved custom life takes over once the browser can be asked for it.
@@ -181,9 +189,11 @@ export function Visualizer() {
   const kidBornAge = s.personaId === 'custom' ? 33 : getPersona(s.personaId).kidBornAge
   const presets = useMemo(() => makePresets(kidBornAge), [kidBornAge])
   const preset = presets.find((p) => p.id === s.presetId) ?? presets[0]
+  // One clamped horizon feeds both the slider and the count, so they always agree.
+  const horizon = Math.min(80, Math.max(s.horizon, Math.round(preset.startAge) + 1))
   const timesCells = useMemo(
-    () => occurrences(preset, s.cadence, s.horizon),
-    [preset, s.cadence, s.horizon],
+    () => occurrences(preset, s.cadence, horizon),
+    [preset, s.cadence, horizon],
   )
   const timesMask = useMemo(() => {
     const m = new Uint8Array(TOTAL)
@@ -335,7 +345,7 @@ export function Visualizer() {
           }}
           cadence={s.cadence}
           onCadence={(value) => dispatch({ type: 'cadence', value })}
-          horizon={Math.min(80, Math.max(s.horizon, Math.round(preset.startAge) + 1))}
+          horizon={horizon}
           onHorizon={(value) => dispatch({ type: 'horizon', value })}
           summary={times}
           preset={preset}

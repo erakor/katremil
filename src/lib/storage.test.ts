@@ -18,10 +18,14 @@ describe('validateLife', () => {
     ['bad birth', { ...good, birthISO: '1990-13-01' }],
     ['chapters not array', { ...good, chapters: 'x' }],
     ['bad pigment', { ...good, chapters: [{ ...good.chapters[0], pigment: 'neon' }] }],
-    ['end before start', { ...good, chapters: [{ ...good.chapters[0], endISO: '1980-01-01' }] }],
     ['dup ids', { ...good, chapters: [good.chapters[0], good.chapters[0]] }],
     ['missing label', { ...good, chapters: [{ ...good.chapters[0], label: 3 }] }],
   ])('rejects %s', (_, raw) => expect(validateLife(raw)).toBeNull())
+
+  it('drops only the chapter whose end precedes its start', () => {
+    const bad = { ...good.chapters[0], id: 'z', endISO: '1980-01-01' }
+    expect(validateLife({ ...good, chapters: [...good.chapters, bad] })).toEqual(good)
+  })
 
   it('drops unknown fields', () => {
     const v = validateLife({ ...good, extra: 1 })
@@ -48,9 +52,37 @@ describe('load and save', () => {
     expect(loadCustom()).toEqual(good)
   })
 
-  it('ignores the old v1 key and corrupt data', () => {
+  it('migrates a birth-mode v1 ledger, skips other v1 data, and rejects corrupt data', () => {
     vi.stubGlobal('localStorage', fake)
     store.set('ftw:v1', JSON.stringify(good))
+    expect(loadCustom()).toBeNull()
+    const v1 = {
+      version: 1,
+      config: { mode: 'birthFull', anchorDate: '1990-06-15' },
+      passedWeeks: [],
+      events: [
+        {
+          id: 'e',
+          title: 'School',
+          start: '1996-09-01',
+          end: '2008-06-30',
+          color: 'emerald',
+          visible: true,
+        },
+      ],
+      milestones: [],
+    }
+    store.set('ftw:v1', JSON.stringify(v1))
+    expect(loadCustom()).toEqual({
+      birthISO: '1990-06-15',
+      chapters: [
+        { id: 'e', label: 'School', startISO: '1996-09-01', endISO: '2008-06-30', pigment: 'sage' },
+      ],
+    })
+    store.set(
+      'ftw:v1',
+      JSON.stringify({ ...v1, config: { mode: 'horizon', anchorDate: '2020-01-06' } }),
+    )
     expect(loadCustom()).toBeNull()
     store.set(STORAGE_KEY, '{nope')
     expect(loadCustom()).toBeNull()

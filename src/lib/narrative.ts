@@ -30,7 +30,7 @@ function stampCopy(s: NonNullable<ReadoutInput['stamp']>): Readout {
   const age = rowOf(s.anchor)
   return {
     lead: `${s.label}, placed at ${age}, is ${pct(s.math.pctOfLifeAtAge)}% of the life you would have lived by then.`,
-    detail: `${fmtInt(s.weeks)} wk · ${pct(s.math.pctOfGrid)}% of the grid · ${pct(s.math.pctOfLifeToday)}% of your life so far · feels like ${pct(s.math.felt)}% · ${s.math.equivalence}`,
+    detail: `${fmtInt(s.math.cells)} wk · ${pct(s.math.pctOfGrid)}% of the grid · ${pct(s.math.pctOfLifeToday)}% of your life so far · feels like ${pct(s.math.felt)}% · ${s.math.equivalence}`,
   }
 }
 

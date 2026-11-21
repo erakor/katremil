@@ -55,11 +55,13 @@ function allCellDates(birthISO: string): string[] {
 export function chapterIndexForCells(life: Life, today: string): Int16Array {
   const out = new Int16Array(TOTAL).fill(-1)
   const dates = allCellDates(life.birthISO)
+  // A cell spans [its start, the next cell's start), so a row's last cell takes the 1-2 spare days.
+  const gridEnd = addYears(life.birthISO, ROWS)
   life.chapters.forEach((ch, idx) => {
     const end = ch.endISO ?? today
     for (let i = 0; i < TOTAL; i++) {
-      const d = dates[i]
-      if (d >= ch.startISO && d <= end) out[i] = idx
+      const next = i + 1 < TOTAL ? dates[i + 1] : gridEnd
+      if (ch.startISO < next && dates[i] <= end) out[i] = idx
     }
   })
   return out

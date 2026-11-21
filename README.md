@@ -27,7 +27,8 @@ look, move the pointer, and the numbers do the arguing.
 
 Only a custom life (birth date and chapters) is saved, in `localStorage` under `ftw:v2`. Sample
 lives are derived from today's date and never stored; editing one forks it into _Yours_. The
-old ledger format (`ftw:v1`) is ignored. Nothing is sent anywhere.
+old ledger (`ftw:v1`) is migrated on first load when it was in a birth mode: its birth date and
+events become your chapters. Nothing is sent anywhere.
 
 ## How it is built
 

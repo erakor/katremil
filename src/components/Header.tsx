@@ -30,7 +30,9 @@ export function Header({
               type="date"
               value={birthISO}
               max={maxBirthISO}
-              onChange={(e) => e.target.value && onBirth(e.target.value)}
+              onChange={(e) =>
+                e.target.value && e.target.value <= maxBirthISO && onBirth(e.target.value)
+              }
               className="num rounded-md border border-hairline bg-white/[0.03] px-2 py-1 text-xs text-ink"
             />
           </label>
