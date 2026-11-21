@@ -1,82 +1,71 @@
-import { describe, expect, it } from 'vitest'
-import { validate } from './storage'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { STORAGE_KEY, loadCustom, saveCustom, validateLife } from './storage'
 
-const good = () => ({
-  version: 1,
-  config: {
-    mode: 'horizon',
-    anchorDate: '2026-01-05',
-    showLabels: true,
-    density: 'standard',
-    highlight: 'all',
-  },
-  passedWeeks: [3, 1, 2],
-  events: [
-    {
-      id: 'e1',
-      title: 'Sprint',
-      start: '2026-01-05',
-      end: '2026-04-04',
-      color: 'lapis',
-      visible: true,
-    },
+const good = {
+  birthISO: '1990-06-15',
+  chapters: [
+    { id: 'a', label: 'One', startISO: '1990-06-15', endISO: '2000-01-01', pigment: 'sage' },
+    { id: 'b', label: 'Two', startISO: '2000-01-02', pigment: 'plum' },
   ],
-  milestones: [{ id: 'm1', title: 'Launch', date: '2026-06-01', visible: true }],
-})
+}
 
-describe('validate', () => {
-  it('accepts a well-formed export and sorts passed weeks', () => {
-    const res = validate(good())
-    expect(res.ok).toBe(true)
-    if (res.ok) expect(res.data.passedWeeks).toEqual([1, 2, 3])
-  })
-
-  it('drops unknown fields', () => {
-    const raw = good() as Record<string, unknown>
-    ;(raw.events as Record<string, unknown>[])[0].extra = 'x'
-    const res = validate(raw)
-    expect(res.ok && 'extra' in res.data.events[0]).toBe(false)
-  })
+describe('validateLife', () => {
+  it('accepts a good life', () => expect(validateLife(good)).toEqual(good))
 
   it.each([
-    ['not an object', () => 'nope'],
-    ['wrong version', () => ({ ...good(), version: 2 })],
-    ['bad mode', () => ({ ...good(), config: { ...good().config, mode: 'x' } })],
-    ['bad anchor', () => ({ ...good(), config: { ...good().config, anchorDate: '2026-02-30' } })],
-    ['fractional week', () => ({ ...good(), passedWeeks: [1.5] })],
-    [
-      'event ending before it starts',
-      () => {
-        const g = good()
-        g.events[0].end = '2025-01-01'
-        return g
+    ['null', null],
+    ['array', []],
+    ['bad birth', { ...good, birthISO: '1990-13-01' }],
+    ['chapters not array', { ...good, chapters: 'x' }],
+    ['bad pigment', { ...good, chapters: [{ ...good.chapters[0], pigment: 'neon' }] }],
+    ['end before start', { ...good, chapters: [{ ...good.chapters[0], endISO: '1980-01-01' }] }],
+    ['dup ids', { ...good, chapters: [good.chapters[0], good.chapters[0]] }],
+    ['missing label', { ...good, chapters: [{ ...good.chapters[0], label: 3 }] }],
+  ])('rejects %s', (_, raw) => expect(validateLife(raw)).toBeNull())
+
+  it('drops unknown fields', () => {
+    const v = validateLife({ ...good, extra: 1 })
+    expect(v).not.toHaveProperty('extra')
+  })
+})
+
+describe('load and save', () => {
+  const store = new Map<string, string>()
+  const fake = {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => void store.set(k, v),
+    removeItem: (k: string) => void store.delete(k),
+  }
+  afterEach(() => {
+    store.clear()
+    vi.unstubAllGlobals()
+  })
+
+  it('round-trips under ftw:v2', () => {
+    vi.stubGlobal('localStorage', fake)
+    saveCustom(good as never)
+    expect(STORAGE_KEY).toBe('ftw:v2')
+    expect(loadCustom()).toEqual(good)
+  })
+
+  it('ignores the old v1 key and corrupt data', () => {
+    vi.stubGlobal('localStorage', fake)
+    store.set('ftw:v1', JSON.stringify(good))
+    expect(loadCustom()).toBeNull()
+    store.set(STORAGE_KEY, '{nope')
+    expect(loadCustom()).toBeNull()
+  })
+
+  it('survives storage that throws', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => {
+        throw new Error('blocked')
       },
-    ],
-    [
-      'unknown color',
-      () => {
-        const g = good()
-        g.events[0].color = 'teal'
-        return g
+      setItem: () => {
+        throw new Error('blocked')
       },
-    ],
-    [
-      'duplicate event ids',
-      () => {
-        const g = good()
-        g.events.push({ ...g.events[0] })
-        return g
-      },
-    ],
-    [
-      'duplicate milestone ids',
-      () => {
-        const g = good()
-        g.milestones.push({ ...g.milestones[0] })
-        return g
-      },
-    ],
-  ])('rejects %s', (_, make) => {
-    expect(validate(make()).ok).toBe(false)
+    })
+    expect(loadCustom()).toBeNull()
+    expect(() => saveCustom(good as never)).not.toThrow()
   })
 })

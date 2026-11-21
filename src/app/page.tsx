@@ -1,5 +1,5 @@
-import { LedgerApp } from '@/components/LedgerApp'
+import { Visualizer } from '@/components/Visualizer'
 
 export default function Home() {
-  return <LedgerApp />
+  return <Visualizer />
 }

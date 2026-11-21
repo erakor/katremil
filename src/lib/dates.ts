@@ -3,8 +3,6 @@
 
 export const DAY_MS = 86_400_000
 export const WEEK_MS = 7 * DAY_MS
-export const TOTAL_WEEKS = 4000
-export const WEEKS_PER_ROW = 52
 export const SOLAR_WEEKS_PER_YEAR = 365.2425 / 7
 export const DAYS_PER_MONTH = 365.2425 / 12
 

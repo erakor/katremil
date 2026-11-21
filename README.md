@@ -1,58 +1,50 @@
 # Four Thousand Weeks
 
-A life ledger. It lays out roughly four thousand weeks, the length of a long human life, as a
-grid: mark the weeks behind you, map projects and chapters onto the ones ahead, and pin the
-milestones that matter.
+A perspective engine, not a tracker. One grid of 80 rows by 52 columns, 4,160 squares: every
+week of a long life, one row per year of age. There is nothing to log and nothing to plan. You
+look, move the pointer, and the numbers do the arguing.
 
 ## Using it
 
-- **Timeline mode.** _Horizon_ shows 4,000 weeks from any start date. _Birth · Full_ starts at
-  your birth week; _Birth · Remaining_ shows only the weeks still ahead.
-- **Weeks.** Click or drag across the grid to mark weeks as passed. _Sync Elapsed to Today_
-  marks everything before the current week. Arrow keys move between weeks.
-- **Events** cover a date range and get a color. **Milestones** are single dates.
-- **Analytics** charts how many events are active per year or decade.
+- **Whose life.** _Age 10 · 30 · 39 · 65_ are sample lives (39 is the default). _Yours_ takes
+  your birth date and your own chapters.
+- **Chapters lens.** Past weeks are colored by chapter, the current week glows amber, and the
+  future is a hairline outline. Hover the last week of any ended chapter to see it lift.
+- **Time.** The _How it feels_ slider warps row heights from the clock (every year equal) to
+  felt time, where early years take more room and late ones less.
+- **X-ray.** Layers for sleep, work, and the first years you will never remember. Hold
+  <kbd>Space</kbd> anywhere to peek at all three. The readout counts the weeks ahead that are
+  still awake and unclaimed.
+- **Stamps.** Pick a chip (a summer, college, a kid at home, a dog's lifespan), hover the grid,
+  and see what that stretch is as a share of your life at that age, of your life so far, and of
+  felt time. Click to leave it in place; <kbd>Esc</kbd> clears.
+- **Times Left lens.** Choose something you do a few times a year, set the pace and an end age,
+  and see the occasions behind you and ahead of you as dots.
+- **Keyboard.** Focus the grid, then arrows move one week or one year, <kbd>Shift</kbd> moves
+  ten weeks or ten years, <kbd>Enter</kbd> places the chosen stamp.
 
 ## Your data
 
-Everything stays in your browser's `localStorage` under the key `ftw:v1`. Nothing is sent
-anywhere, so clearing site data or switching browsers starts you over. Use **Export** to save a
-JSON backup and **Import** to restore one. Import asks before replacing the current ledger and
-offers an undo afterwards.
+Only a custom life (birth date and chapters) is saved, in `localStorage` under `ftw:v2`. Sample
+lives are derived from today's date and never stored; editing one forks it into _Yours_. The
+old ledger format (`ftw:v1`) is ignored. Nothing is sent anywhere.
 
-The export is the `Persisted` shape in `src/lib/types.ts`. Passed weeks are stored as absolute week
-numbers (Mondays counted from 1970-01-05), so they survive changes to the mode or start date. All
-date math runs on UTC calendar dates, so a week never shifts with the viewer's time zone or
-daylight saving.
+## How it is built
 
-## Development
-
-Requires Node 26 and pnpm 12 (see `.nvmrc` and `packageManager`).
+Next.js (App Router), React, Tailwind v4. The grid is a single DPR-aware `<canvas>` painted by
+a pure `drawScene` in `src/lib/render.ts`, so warping and x-ray fades never touch layout. All
+the math (cells, warp weights, stamps, times left, microcopy, storage validation) lives in
+`src/lib/` and is unit-tested.
 
 ```bash
 pnpm install
-```
-
-```bash
 pnpm dev
 ```
 
-| Script           | What it does                                                  |
-| ---------------- | ------------------------------------------------------------- |
-| `pnpm dev`       | Dev server on http://localhost:3000                           |
-| `pnpm build`     | Production build (the app is fully static)                    |
-| `pnpm test`      | Unit tests (Vitest): dates, storage validation, state reducer |
-| `pnpm typecheck` | Generates Next's route types, then runs `tsc`                 |
-| `pnpm lint`      | oxlint, failing on warnings                                   |
-| `pnpm format`    | oxfmt; `pnpm format:check` only reports                       |
-
-Lint, format and TypeScript settings come from
-[`erakor/toolchain`](https://github.com/erakor/toolchain), which also provides the CI checks in
-`.github/workflows/checks.yml`. Change shared settings there, not here.
-
-### Layout
-
-- `src/lib/`: pure logic. `dates.ts` (UTC calendar math), `timeline.ts` (grid layout and event
-  indexing), `storage.ts` (persistence and import validation).
-- `src/hooks/useLedgerState.ts`: the app state reducer, hydration and debounced saving.
-- `src/components/`: the UI. `LedgerApp.tsx` wires it together.
+```bash
+pnpm test
+pnpm lint
+pnpm format:check
+pnpm typecheck
+pnpm build
+```
