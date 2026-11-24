@@ -1,34 +1,46 @@
 import { describe, expect, it } from 'vitest'
-import { TOTAL } from './life'
+import { addWeeks, daysBetween } from './dates'
+import { TOTAL, cellDateAt } from './life'
 import {
-  MARK_CELLS,
   UNITS,
   elapsedPct,
+  formatPct,
   formatSpan,
-  markWeek,
+  markAt,
+  marksFor,
   nextMark,
   nextUnit,
 } from './milestones'
 
+const BIRTH = '1990-01-01'
+const marks = marksFor(BIRTH)
+
 describe('marks', () => {
-  it('sit on weeks 1,000 to 4,000, which are cells 999 to 3999', () => {
-    expect(MARK_CELLS).toEqual([999, 1999, 2999, 3999])
-    expect(markWeek(2999)).toBe(3000)
-    expect(markWeek(3000)).toBeNull()
+  it('date week N from birth + (N - 1) * 7 days', () => {
+    expect(marks.map((m) => m.week)).toEqual([1000, 2000, 3000, 4000])
+    expect(marks[3].dateISO).toBe(addWeeks(BIRTH, 3999))
+    expect(daysBetween(BIRTH, marks[3].dateISO)).toBe(27993)
   })
 
-  it('finds the next mark ahead of the current week', () => {
-    expect(nextMark(0)).toEqual({ week: 1000, cell: 999, inWeeks: 999 })
-    expect(nextMark(2048)).toEqual({ week: 3000, cell: 2999, inWeeks: 951 })
+  it('place each mark in the cell that holds its date, not cell N - 1', () => {
+    for (const m of marks) {
+      expect(cellDateAt(BIRTH, m.cell) <= m.dateISO).toBe(true)
+      if (m.cell + 1 < TOTAL) expect(cellDateAt(BIRTH, m.cell + 1) > m.dateISO).toBe(true)
+    }
+    // Rows are calendar years of 52 cells, so the 4,000th week lands well before cell 3999.
+    expect(marks[3].cell).toBeLessThan(3999)
+    expect(markAt(marks, marks[2].cell)?.week).toBe(3000)
+    expect(markAt(marks, marks[2].cell + 1)).toBeNull()
   })
 
-  it('does not count the week you are standing on as ahead', () => {
-    expect(nextMark(999)?.week).toBe(2000)
+  it('finds the next mark ahead of the current cell', () => {
+    expect(nextMark(marks, 0)).toMatchObject({ week: 1000, inWeeks: marks[0].cell })
+    expect(nextMark(marks, marks[0].cell)?.week).toBe(2000)
   })
 
   it('returns null after the last mark', () => {
-    expect(nextMark(3999)).toBeNull()
-    expect(nextMark(TOTAL - 1)).toBeNull()
+    expect(nextMark(marks, marks[3].cell)).toBeNull()
+    expect(nextMark(marks, TOTAL - 1)).toBeNull()
   })
 })
 
@@ -41,21 +53,29 @@ describe('elapsedPct', () => {
   })
 })
 
+describe('formatPct', () => {
+  it('floors to one decimal so it never reads 100% early', () => {
+    expect(formatPct(elapsedPct(TOTAL - 1))).toBe('99.9%')
+    expect(formatPct(49.27)).toBe('49.2%')
+    expect(formatPct(100)).toBe('100.0%')
+  })
+})
+
 describe('formatSpan', () => {
-  it('formats weeks, with a singular', () => {
-    expect(formatSpan(2111, 'weeks')).toBe('2,111 weeks')
-    expect(formatSpan(1, 'weeks')).toBe('1 week')
+  it('formats whole weeks from days, with a singular', () => {
+    expect(formatSpan(14830, 'weeks')).toBe('2,118 weeks')
+    expect(formatSpan(7, 'weeks')).toBe('1 week')
   })
 
-  it('formats days and months from weeks', () => {
-    expect(formatSpan(10, 'days')).toBe('70 days')
-    expect(formatSpan(52.1775, 'months')).toBe('12 months')
+  it('formats days and months', () => {
+    expect(formatSpan(70, 'days')).toBe('70 days')
+    expect(formatSpan(365.2425, 'months')).toBe('12 months')
   })
 
-  it('splits years and weeks without ever showing 52 weeks', () => {
-    expect(formatSpan(2111, 'years')).toBe('40 years 24 weeks')
-    // 104 weeks is 1 year and 51.8 weeks, which rounds up to a whole second year.
-    expect(formatSpan(104, 'years')).toBe('2 years 0 weeks')
+  it('splits years and weeks', () => {
+    // About 40.6 years: 40 years and 31 weeks.
+    expect(formatSpan(14830, 'years')).toBe('40 years 31 weeks')
+    expect(formatSpan(731, 'years')).toBe('2 years 0 weeks')
   })
 
   it('never goes negative', () => {

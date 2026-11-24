@@ -1,6 +1,5 @@
 import { AMBER, GHOST, INK, OUTLINE } from './pigments'
 import { COLS, ROWS, TOTAL } from './life'
-import { MARK_CELLS } from './milestones'
 import { FROSTED_ROWS, SLEEP_FRAC, WORK_FRAC, isWorkRow } from './xray'
 
 export interface StampMark {
@@ -25,6 +24,8 @@ export interface Scene {
   xray: { forgotten: number; sleep: number; work: number }
   stamps: StampMark[]
   hover: number | null
+  /** Cells holding a 1,000-week mark. */
+  marks: readonly { cell: number }[]
 }
 
 export interface Rect {
@@ -140,7 +141,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, s: Scene): void {
   // 1,000-week marks: the cell is outlined, with a small diamond when the row is tall enough.
   ctx.strokeStyle = INK
   ctx.lineWidth = 1
-  for (const cell of MARK_CELLS) {
+  for (const { cell } of s.marks) {
     const r = cellRect(s, cell)
     ctx.globalAlpha = 0.8
     ctx.strokeRect(r.x - 0.5, r.y - 0.5, r.w + 1, r.h + 1)

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { currentCell, chapterIndexForCells, lastWeekCells } from './life'
+import { TOTAL, currentCell, chapterIndexForCells, lastWeekCells } from './life'
+import { marksFor } from './milestones'
 import { readout } from './narrative'
 import type { ReadoutInput } from './narrative'
 import { personaLife } from './personas'
@@ -9,6 +10,7 @@ const TODAY = '2026-11-21'
 const life = personaLife('39', TODAY)
 const current = currentCell(life.birthISO, TODAY)
 const lastWeeks = lastWeekCells(life, TODAY)
+const marks = marksFor(life.birthISO)
 
 const base: ReadoutInput = {
   lens: 'chapters',
@@ -27,6 +29,7 @@ const base: ReadoutInput = {
     future: 41,
   },
   unit: 'weeks',
+  marks,
 }
 const lastCell = [...lastWeeks.keys()][0]
 const stamp = { label: '10-wk Summer', weeks: 10, anchor: 520, math: stampMath(520, 10, current) }
@@ -69,17 +72,42 @@ describe('readout priority', () => {
   it('opens with the share of the grid behind you and the time left', () => {
     const r = readout(base)
     expect(r.figure).toBe('49.2%')
-    expect(r.remaining).toBe('2,111 weeks left')
-    expect(readout({ ...base, unit: 'days' }).remaining).toBe('14,777 days left')
+    expect(r.remaining).toBe('2,118 weeks left')
+    expect(readout({ ...base, unit: 'years' }).remaining).toBe('40 years 31 weeks left')
+    expect(readout({ ...base, unit: 'days' }).remaining).toMatch(/^14,8\d\d days left$/)
+  })
+
+  it('never shows 100% while a week is left', () => {
+    const r = readout({ ...base, current: TOTAL - 1 })
+    expect(r.figure).toBe('99.9%')
+    expect(r.remaining).toBe('0 weeks left')
   })
 
   it('names the next 1,000-week mark', () => {
-    expect(readout(base).detail).toMatch(/week 3,000.*in 951 wk/)
-    expect(readout({ ...base, current: 3999 }).detail).toMatch(/past the 4,000-week mark/)
+    expect(readout(base).detail).toMatch(/week 3,000.*in \d+ wk/)
+    expect(readout({ ...base, current: marks[3].cell + 1 }).detail).toBe('past the 4,000-week mark')
+  })
+
+  it('says so when you are standing on a mark', () => {
+    expect(readout({ ...base, current: marks[3].cell }).detail).toBe(
+      'you are on the 4,000-week mark',
+    )
+    expect(readout({ ...base, current: marks[0].cell }).detail).toMatch(
+      /^you are on the 1,000-week mark · next 1,000-week mark: week 2,000/,
+    )
   })
 
   it('explains a hovered mark cell, past or future', () => {
-    expect(readout({ ...base, hoverCell: 999 }).lead).toMatch(/passed the 1,000-week mark/)
-    expect(readout({ ...base, hoverCell: 2999 }).lead).toMatch(/3,000-week mark arrives/)
+    expect(readout({ ...base, hoverCell: marks[0].cell }).lead).toMatch(
+      /passed the 1,000-week mark/,
+    )
+    expect(readout({ ...base, hoverCell: marks[2].cell }).lead).toMatch(/3,000-week mark arrives/)
+  })
+
+  it('keeps the chapter on a hovered past mark', () => {
+    const cell = marks[0].cell
+    const ci = base.chapterIdx[cell]
+    expect(ci).toBeGreaterThanOrEqual(0)
+    expect(readout({ ...base, hoverCell: cell }).detail).toContain(`“${life.chapters[ci].label}”`)
   })
 })

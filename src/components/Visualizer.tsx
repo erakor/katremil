@@ -5,14 +5,22 @@ import { useCallback, useEffect, useMemo, useReducer, useState, useSyncExternalS
 import { Header } from '@/components/Header'
 import { Intro } from '@/components/Intro'
 import type { PersonaChoice } from '@/components/Header'
-import { LifeCanvas } from '@/components/LifeCanvas'
+import { AXIS_LEFT_REM, AXIS_RIGHT_REM, LifeCanvas } from '@/components/LifeCanvas'
 import { NarrativeReadout } from '@/components/NarrativeReadout'
 import { Sidebar } from '@/components/Sidebar'
 import type { Density, Lens } from '@/components/Sidebar'
 import { todayISO } from '@/lib/dates'
-import { TOTAL, chapterIndexForCells, chapterWeeks, currentCell, lastWeekCells } from '@/lib/life'
+import {
+  COLS,
+  ROWS,
+  TOTAL,
+  chapterIndexForCells,
+  chapterWeeks,
+  currentCell,
+  lastWeekCells,
+} from '@/lib/life'
 import type { Chapter, Life } from '@/lib/life'
-import { nextUnit } from '@/lib/milestones'
+import { marksFor, nextUnit } from '@/lib/milestones'
 import type { RemainingUnit } from '@/lib/milestones'
 import { readout } from '@/lib/narrative'
 import { DEFAULT_PERSONA, getPersona, personaLife } from '@/lib/personas'
@@ -199,6 +207,7 @@ export function Visualizer() {
   const current = useMemo(() => currentCell(life.birthISO, today), [life.birthISO, today])
   const chapterIdx = useMemo(() => chapterIndexForCells(life, today), [life, today])
   const lastWeeks = useMemo(() => lastWeekCells(life, today), [life, today])
+  const marks = useMemo(() => marksFor(life.birthISO), [life.birthISO])
   const chapterHex = useMemo(() => life.chapters.map((c) => pigmentHex(c.pigment)), [life.chapters])
   const lengths = useMemo(() => chapterWeeks(life, today), [life, today])
 
@@ -270,6 +279,7 @@ export function Visualizer() {
           future: times.future,
         },
         unit,
+        marks,
       }),
     // `xray` is derived from two state fields, so list those instead of the fresh object.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -286,6 +296,7 @@ export function Visualizer() {
       preset.label,
       times,
       unit,
+      marks,
     ],
   )
 
@@ -324,11 +335,11 @@ export function Visualizer() {
           >
             <div
               className="h-full max-w-full min-w-0"
-              // Compact makes the cells close to square: the grid is 52 wide by 80 tall.
+              // Compact makes the cells close to square: the grid is COLS wide by ROWS tall.
               style={{
                 width:
                   density === 'compact'
-                    ? 'calc((var(--grid-h) - 0.5rem) * 0.65 + 4.75rem)'
+                    ? `calc((var(--grid-h) - 0.5rem) * ${COLS / ROWS} + ${AXIS_LEFT_REM + AXIS_RIGHT_REM}rem)`
                     : '100%',
               }}
             >
@@ -343,6 +354,7 @@ export function Visualizer() {
                 xray={xray}
                 stamps={stamps}
                 hover={s.hover}
+                marks={marks}
                 onHover={(cell) => dispatch({ type: 'hover', cell })}
                 onCell={(cell) => dispatch({ type: 'cell', cell })}
                 onClear={() => dispatch({ type: 'clear' })}
@@ -350,7 +362,7 @@ export function Visualizer() {
             </div>
           </div>
           <p className="num px-5 pt-2 text-xs text-muted">
-            80 rows × 52 weeks = 4,160. The book says about 4,000.{' '}
+            {ROWS} rows × {COLS} weeks = {TOTAL.toLocaleString('en-US')}. The book says about 4,000.{' '}
             <button
               type="button"
               onClick={() => setIntroOpen(true)}

@@ -45,7 +45,8 @@ export function Intro({ open, onClose }: { open: boolean; onClose: () => void })
         <div className="pt-2">
           <button
             type="button"
-            onClick={onClose}
+            // Closing the dialog fires its `close` event, the single path to onClose.
+            onClick={() => ref.current?.close()}
             autoFocus
             className="rounded-md border border-amber bg-amber/15 px-4 py-2 text-sm font-medium text-amber transition-colors hover:bg-amber/25"
           >

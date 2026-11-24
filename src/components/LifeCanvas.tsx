@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent, PointerEvent } from 'react'
 import { COLS, ROWS, TOTAL, rowOf } from '@/lib/life'
-import { MARK_CELLS } from '@/lib/milestones'
+import type { Mark } from '@/lib/milestones'
 import { drawScene, cellRect } from '@/lib/render'
 import type { Scene, StampMark } from '@/lib/render'
 import { rowAtY, rowOffsets } from '@/lib/warp'
@@ -20,6 +20,8 @@ export interface LifeCanvasProps {
   xray: XrayFlags
   stamps: StampMark[]
   hover: number | null
+  /** The 1,000-week marks for this birth date. */
+  marks: Mark[]
   onHover: (cell: number | null) => void
   onCell: (cell: number) => void
   onClear: () => void
@@ -27,6 +29,10 @@ export interface LifeCanvasProps {
 
 const DECADES = [0, 10, 20, 30, 40, 50, 60, 70, 79]
 const MIN_TICK_GAP = 14
+
+/** Widths of the age axis (left) and the mark labels (right), in rem. */
+export const AXIS_LEFT_REM = 2.25
+export const AXIS_RIGHT_REM = 2.5
 
 const prefersReducedMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -104,6 +110,7 @@ export function LifeCanvas(props: LifeCanvasProps) {
       xray: { forgotten: a.forgotten, sleep: a.sleep, work: a.work },
       stamps: p.stamps,
       hover: p.hover,
+      marks: p.marks,
     }
     drawScene(ctx, scene)
 
@@ -183,7 +190,11 @@ export function LifeCanvas(props: LifeCanvasProps) {
 
   return (
     <div className="flex h-full">
-      <div className="relative w-9 shrink-0 select-none" aria-hidden="true">
+      <div
+        className="relative shrink-0 select-none"
+        style={{ width: `${AXIS_LEFT_REM}rem` }}
+        aria-hidden="true"
+      >
         {size.h > 0 &&
           ticks.map((age) => (
             <span
@@ -234,15 +245,19 @@ export function LifeCanvas(props: LifeCanvasProps) {
         )}
       </div>
       {/* oxlint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
-      <div className="relative w-10 shrink-0 select-none" aria-hidden="true">
+      <div
+        className="relative shrink-0 select-none"
+        style={{ width: `${AXIS_RIGHT_REM}rem` }}
+        aria-hidden="true"
+      >
         {size.h > 0 &&
-          MARK_CELLS.map((cell) => (
+          props.marks.map(({ week, cell }) => (
             <span
-              key={cell}
+              key={week}
               className="num absolute left-2 text-[10px] leading-none text-muted"
               style={{ top: 0, transform: `translateY(${rowMid(rowOf(cell)) - 5}px)` }}
             >
-              {(cell + 1).toLocaleString('en-US')}
+              {week.toLocaleString('en-US')}
             </span>
           ))}
       </div>
