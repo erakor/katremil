@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent, PointerEvent } from 'react'
 import { COLS, ROWS, TOTAL, rowOf } from '@/lib/life'
+import { MARK_CELLS } from '@/lib/milestones'
 import { drawScene, cellRect } from '@/lib/render'
 import type { Scene, StampMark } from '@/lib/render'
 import { rowAtY, rowOffsets } from '@/lib/warp'
@@ -233,6 +234,18 @@ export function LifeCanvas(props: LifeCanvasProps) {
         )}
       </div>
       {/* oxlint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+      <div className="relative w-10 shrink-0 select-none" aria-hidden="true">
+        {size.h > 0 &&
+          MARK_CELLS.map((cell) => (
+            <span
+              key={cell}
+              className="num absolute left-2 text-[10px] leading-none text-muted"
+              style={{ top: 0, transform: `translateY(${rowMid(rowOf(cell)) - 5}px)` }}
+            >
+              {(cell + 1).toLocaleString('en-US')}
+            </span>
+          ))}
+      </div>
     </div>
   )
 }

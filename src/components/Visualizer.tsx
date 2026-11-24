@@ -1,20 +1,24 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useReducer, useSyncExternalStore } from 'react'
+import type { CSSProperties } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useState, useSyncExternalStore } from 'react'
 import { Header } from '@/components/Header'
+import { Intro } from '@/components/Intro'
 import type { PersonaChoice } from '@/components/Header'
 import { LifeCanvas } from '@/components/LifeCanvas'
 import { NarrativeReadout } from '@/components/NarrativeReadout'
 import { Sidebar } from '@/components/Sidebar'
-import type { Lens } from '@/components/Sidebar'
+import type { Density, Lens } from '@/components/Sidebar'
 import { todayISO } from '@/lib/dates'
 import { TOTAL, chapterIndexForCells, chapterWeeks, currentCell, lastWeekCells } from '@/lib/life'
 import type { Chapter, Life } from '@/lib/life'
+import { nextUnit } from '@/lib/milestones'
+import type { RemainingUnit } from '@/lib/milestones'
 import { readout } from '@/lib/narrative'
 import { DEFAULT_PERSONA, getPersona, personaLife } from '@/lib/personas'
 import { pigmentHex } from '@/lib/pigments'
 import type { StampMark } from '@/lib/render'
-import { loadCustom, saveCustom } from '@/lib/storage'
+import { hasSeenIntro, loadCustom, markIntroSeen, saveCustom } from '@/lib/storage'
 import { STAMPS, stampMath } from '@/lib/stamps'
 import { makePresets, nearestCadence, occurrences, summary } from '@/lib/timesLeft'
 import type { XrayFlags } from '@/lib/xray'
@@ -137,6 +141,18 @@ function isTypingTarget(t: EventTarget | null): boolean {
 export function Visualizer() {
   const today = useSyncExternalStore(subscribeToday, todayISO, () => SERVER_TODAY)
   const [s, dispatch] = useReducer(reducer, initial)
+  const [unit, setUnit] = useState<RemainingUnit>('weeks')
+  const [density, setDensity] = useState<Density>('standard')
+  const [introOpen, setIntroOpen] = useState(false)
+
+  // The opening note shows once; the caption under the grid brings it back.
+  useEffect(() => {
+    if (!hasSeenIntro()) setIntroOpen(true)
+  }, [])
+  const closeIntro = useCallback(() => {
+    markIntroSeen()
+    setIntroOpen(false)
+  }, [])
 
   // A saved custom life takes over once the browser can be asked for it.
   useEffect(() => {
@@ -253,6 +269,7 @@ export function Visualizer() {
           past: times.past,
           future: times.future,
         },
+        unit,
       }),
     // `xray` is derived from two state fields, so list those instead of the fresh object.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -268,6 +285,7 @@ export function Visualizer() {
       activeStamp,
       preset.label,
       times,
+      unit,
     ],
   )
 
@@ -289,6 +307,7 @@ export function Visualizer() {
 
   return (
     <div className="flex min-h-dvh flex-col">
+      <Intro open={introOpen} onClose={closeIntro} />
       <Header
         personaId={s.personaId}
         onPersona={onPersona}
@@ -298,28 +317,54 @@ export function Visualizer() {
       />
       <div className="grid flex-1 lg:grid-cols-[7fr_3fr]">
         <main className="flex min-w-0 flex-col pb-5">
-          <NarrativeReadout readout={text} />
-          <div className="h-[max(480px,calc(100dvh-14rem))] px-3 pt-2">
-            <LifeCanvas
-              current={current}
-              chapterIdx={chapterIdx}
-              chapterHex={chapterHex}
-              lastWeeks={lastWeeks}
-              times={s.lens === 'times' ? timesMask : null}
-              lens={s.lens}
-              warp={s.warp}
-              xray={xray}
-              stamps={stamps}
-              hover={s.hover}
-              onHover={(cell) => dispatch({ type: 'hover', cell })}
-              onCell={(cell) => dispatch({ type: 'cell', cell })}
-              onClear={() => dispatch({ type: 'clear' })}
-            />
+          <NarrativeReadout readout={text} onCycleUnit={() => setUnit(nextUnit)} />
+          <div
+            className="flex h-(--grid-h) justify-center px-3 pt-2"
+            style={{ '--grid-h': 'max(480px, calc(100dvh - 15rem))' } as CSSProperties}
+          >
+            <div
+              className="h-full max-w-full min-w-0"
+              // Compact makes the cells close to square: the grid is 52 wide by 80 tall.
+              style={{
+                width:
+                  density === 'compact'
+                    ? 'calc((var(--grid-h) - 0.5rem) * 0.65 + 4.75rem)'
+                    : '100%',
+              }}
+            >
+              <LifeCanvas
+                current={current}
+                chapterIdx={chapterIdx}
+                chapterHex={chapterHex}
+                lastWeeks={lastWeeks}
+                times={s.lens === 'times' ? timesMask : null}
+                lens={s.lens}
+                warp={s.warp}
+                xray={xray}
+                stamps={stamps}
+                hover={s.hover}
+                onHover={(cell) => dispatch({ type: 'hover', cell })}
+                onCell={(cell) => dispatch({ type: 'cell', cell })}
+                onClear={() => dispatch({ type: 'clear' })}
+              />
+            </div>
           </div>
+          <p className="num px-5 pt-2 text-xs text-muted">
+            80 rows × 52 weeks = 4,160. The book says about 4,000.{' '}
+            <button
+              type="button"
+              onClick={() => setIntroOpen(true)}
+              className="underline decoration-dotted underline-offset-4 hover:decoration-solid"
+            >
+              Why four thousand?
+            </button>
+          </p>
         </main>
         <Sidebar
           lens={s.lens}
           onLens={(lens) => dispatch({ type: 'lens', lens })}
+          density={density}
+          onDensity={setDensity}
           warp={s.warp}
           onWarp={(value) => dispatch({ type: 'warp', value })}
           xray={s.xray}

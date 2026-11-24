@@ -26,6 +26,7 @@ const base: ReadoutInput = {
     past: 39,
     future: 41,
   },
+  unit: 'weeks',
 }
 const lastCell = [...lastWeeks.keys()][0]
 const stamp = { label: '10-wk Summer', weeks: 10, anchor: 520, math: stampMath(520, 10, current) }
@@ -63,5 +64,22 @@ describe('readout priority', () => {
   it('ignores a stamp that covers nothing', () => {
     const empty = { ...stamp, math: stampMath(4160, 10, current) }
     expect(readout({ ...base, stamp: empty }).lead).toMatch(/Every square/)
+  })
+
+  it('opens with the share of the grid behind you and the time left', () => {
+    const r = readout(base)
+    expect(r.figure).toBe('49.2%')
+    expect(r.remaining).toBe('2,111 weeks left')
+    expect(readout({ ...base, unit: 'days' }).remaining).toBe('14,777 days left')
+  })
+
+  it('names the next 1,000-week mark', () => {
+    expect(readout(base).detail).toMatch(/week 3,000.*in 951 wk/)
+    expect(readout({ ...base, current: 3999 }).detail).toMatch(/past the 4,000-week mark/)
+  })
+
+  it('explains a hovered mark cell, past or future', () => {
+    expect(readout({ ...base, hoverCell: 999 }).lead).toMatch(/passed the 1,000-week mark/)
+    expect(readout({ ...base, hoverCell: 2999 }).lead).toMatch(/3,000-week mark arrives/)
   })
 })

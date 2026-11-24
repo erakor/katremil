@@ -109,3 +109,22 @@ export function readRaw(): string | null {
     return null
   }
 }
+
+const INTRO_KEY = 'ftw:intro'
+
+/** Whether the opening note has been dismissed before. Storage failures read as "not seen". */
+export function hasSeenIntro(): boolean {
+  try {
+    return localStorage.getItem(INTRO_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function markIntroSeen(): void {
+  try {
+    localStorage.setItem(INTRO_KEY, '1')
+  } catch {
+    /* the note simply shows again next visit */
+  }
+}

@@ -12,6 +12,7 @@ import type { Preset, TimesSummary } from '@/lib/timesLeft'
 import type { XrayFlags } from '@/lib/xray'
 
 export type Lens = 'chapters' | 'times'
+export type Density = 'standard' | 'compact'
 
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -25,6 +26,8 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
 export interface SidebarProps {
   lens: Lens
   onLens: (l: Lens) => void
+  density: Density
+  onDensity: (d: Density) => void
   warp: number
   onWarp: (v: number) => void
   xray: XrayFlags
@@ -60,6 +63,19 @@ export function Sidebar(p: SidebarProps) {
           options={[
             { value: 'chapters', label: 'Chapters' },
             { value: 'times', label: 'Times Left' },
+          ]}
+        />
+      </Group>
+
+      <Group title="Grid">
+        <Segmented<Density>
+          full
+          ariaLabel="Grid density"
+          value={p.density}
+          onChange={p.onDensity}
+          options={[
+            { value: 'standard', label: 'Standard', title: 'Fill the width available' },
+            { value: 'compact', label: 'Compact', title: 'Closer to square cells' },
           ]}
         />
       </Group>

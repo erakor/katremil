@@ -1,5 +1,6 @@
 import { AMBER, GHOST, INK, OUTLINE } from './pigments'
 import { COLS, ROWS, TOTAL } from './life'
+import { MARK_CELLS } from './milestones'
 import { FROSTED_ROWS, SLEEP_FRAC, WORK_FRAC, isWorkRow } from './xray'
 
 export interface StampMark {
@@ -135,6 +136,29 @@ export function drawScene(ctx: CanvasRenderingContext2D, s: Scene): void {
     }
     ctx.globalAlpha = 1
   }
+
+  // 1,000-week marks: the cell is outlined, with a small diamond when the row is tall enough.
+  ctx.strokeStyle = INK
+  ctx.lineWidth = 1
+  for (const cell of MARK_CELLS) {
+    const r = cellRect(s, cell)
+    ctx.globalAlpha = 0.8
+    ctx.strokeRect(r.x - 0.5, r.y - 0.5, r.w + 1, r.h + 1)
+    if (r.h >= 6) {
+      const cx = r.x + r.w / 2
+      const cy = r.y + r.h / 2
+      const d = Math.min(r.w, r.h) * 0.32
+      setFill(INK)
+      ctx.beginPath()
+      ctx.moveTo(cx, cy - d)
+      ctx.lineTo(cx + d, cy)
+      ctx.lineTo(cx, cy + d)
+      ctx.lineTo(cx - d, cy)
+      ctx.closePath()
+      ctx.fill()
+    }
+  }
+  ctx.globalAlpha = 1
 
   // Times Left occurrences: past ones are quiet, future ones are amber.
   if (s.times && s.lensT > 0.003) {

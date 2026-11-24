@@ -20,12 +20,20 @@ look, move the pointer, and the numbers do the arguing.
   felt time. Click to leave it in place; <kbd>Esc</kbd> clears.
 - **Times Left lens.** Choose something you do a few times a year, set the pace and an end age,
   and see the occasions behind you and ahead of you as dots.
+- **Opening readout.** The share of the grid already behind you, the time left (click it to
+  switch between weeks, years, months and days), and the next 1,000-week mark.
+- **1,000-week marks.** Weeks 1,000, 2,000, 3,000 and 4,000 are outlined on the grid and labeled
+  on the right edge. Hover one to see its date.
+- **Why four thousand?** A short note on the book's idea, shown on first visit and always
+  available from the line under the grid. It also says why the grid holds 4,160 weeks.
+- **Grid density.** _Standard_ fills the width; _Compact_ makes the cells close to square.
 - **Keyboard.** Focus the grid, then arrows move one week or one year, <kbd>Shift</kbd> moves
   ten weeks or ten years, <kbd>Enter</kbd> places the chosen stamp.
 
 ## Your data
 
-Only a custom life (birth date and chapters) is saved, in `localStorage` under `ftw:v2`. Sample
+Only a custom life (birth date and chapters) is saved, in `localStorage` under `ftw:v2`. The
+opening note remembers that you dismissed it under `ftw:intro`. Sample
 lives are derived from today's date and never stored; editing one forks it into _Yours_. The
 old ledger (`ftw:v1`) is migrated on first load when it was in a birth mode: its birth date and
 events become your chapters. Nothing is sent anywhere.

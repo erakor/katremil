@@ -2,12 +2,18 @@ import { fmtInt, formatDate } from './dates'
 import { COLS, TOTAL, cellDateAt, colOf, rowOf } from './life'
 import type { Chapter } from './life'
 import type { StampMath } from './stamps'
+import { elapsedPct, formatSpan, markWeek, nextMark } from './milestones'
+import type { RemainingUnit } from './milestones'
 import { FROSTED_ROWS, awakeUnclaimedWeeks } from './xray'
 import type { XrayFlags } from './xray'
 
 export interface Readout {
   lead: string
   detail: string
+  /** A large number shown beside the lead (the opening readout only). */
+  figure?: string
+  /** Time left, in the chosen unit. The view renders it as a button that cycles the unit. */
+  remaining?: string
 }
 
 export interface ReadoutInput {
@@ -22,6 +28,7 @@ export interface ReadoutInput {
   hoverCell: number | null
   stamp: { label: string; weeks: number; anchor: number; math: StampMath } | null
   times: { label: string; takeaway: string; past: number; future: number } | null
+  unit: RemainingUnit
 }
 
 const pct = (n: number) => (n >= 10 ? n.toFixed(0) : n >= 1 ? n.toFixed(1) : n.toFixed(2))
@@ -39,6 +46,18 @@ function hoverCopy(i: ReadoutInput, cell: number): Readout {
   const ci = i.chapterIdx[cell]
   const chapter = ci >= 0 ? i.chapters[ci].label : null
   const where = `Age ${rowOf(cell)}, week ${colOf(cell) + 1}`
+  const mark = markWeek(cell)
+  if (mark !== null) {
+    const n = fmtInt(mark)
+    const lead =
+      cell < i.current
+        ? `You passed the ${n}-week mark on ${date}.`
+        : cell === i.current
+          ? `You are standing on the ${n}-week mark.`
+          : `The ${n}-week mark arrives on ${date}.`
+    const away = cell > i.current ? ` · ${fmtInt(cell - i.current)} wk from now` : ''
+    return { lead, detail: `Week ${n} · ${where}${away}` }
+  }
   if (cell < i.current) {
     return {
       lead: chapter ? `A week of “${chapter}”.` : 'A week before you were keeping track.',
@@ -100,8 +119,13 @@ export function readout(i: ReadoutInput): Readout {
   if (x) return x
 
   const ahead = TOTAL - 1 - i.current
+  const next = nextMark(i.current)
   return {
-    lead: 'Every square is one week. This is all of them.',
-    detail: `${fmtInt(i.current)} behind you · ${fmtInt(ahead)} ahead, give or take`,
+    figure: `${elapsedPct(i.current).toFixed(1)}%`,
+    lead: 'of the grid is behind you. Every square is one week.',
+    remaining: `${formatSpan(ahead, i.unit)} left`,
+    detail: next
+      ? `next 1,000-week mark: week ${fmtInt(next.week)}, ${formatDate(cellDateAt(i.birthISO, next.cell))}, in ${fmtInt(next.inWeeks)} wk`
+      : 'past the 4,000-week mark',
   }
 }
