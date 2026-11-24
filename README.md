@@ -10,6 +10,9 @@ look, move the pointer, and the numbers do the arguing.
   your birth date and your own chapters.
 - **Chapters lens.** Past weeks are colored by chapter, the current week glows amber, and the
   future is a hairline outline. Hover the last week of any ended chapter to see it lift.
+- **Chapter share.** Hover a past week of a chapter to see its share of your life now and by
+  ages 60 and 80. An ended chapter only thins out; an ongoing one grows, if it continues. Ages
+  already behind you are left out. _Edit chapters_ shows the same numbers under each chapter.
 - **Time.** The _How it feels_ slider warps row heights from the clock (every year equal) to
   felt time, where early years take more room and late ones less.
 - **X-ray.** Layers for sleep, work, and the first years you will never remember. Hold

@@ -9,6 +9,7 @@ import { AXIS_LEFT_REM, AXIS_RIGHT_REM, LifeCanvas } from '@/components/LifeCanv
 import { NarrativeReadout } from '@/components/NarrativeReadout'
 import { Sidebar } from '@/components/Sidebar'
 import type { Density, Lens } from '@/components/Sidebar'
+import { chapterShare } from '@/lib/chapterShare'
 import { todayISO } from '@/lib/dates'
 import {
   COLS,
@@ -210,6 +211,10 @@ export function Visualizer() {
   const marks = useMemo(() => marksFor(life.birthISO), [life.birthISO])
   const chapterHex = useMemo(() => life.chapters.map((c) => pigmentHex(c.pigment)), [life.chapters])
   const lengths = useMemo(() => chapterWeeks(life, today), [life, today])
+  const shares = useMemo(
+    () => life.chapters.map((c) => chapterShare(life.birthISO, c, today)),
+    [life, today],
+  )
 
   const kidBornAge = s.personaId === 'custom' ? 33 : getPersona(s.personaId).kidBornAge
   const presets = useMemo(() => makePresets(kidBornAge), [kidBornAge])
@@ -269,6 +274,7 @@ export function Visualizer() {
         chapters: life.chapters,
         chapterIdx,
         lastWeeks,
+        shares,
         xray,
         hoverCell: s.hover,
         stamp: activeStamp,
@@ -289,6 +295,7 @@ export function Visualizer() {
       current,
       chapterIdx,
       lastWeeks,
+      shares,
       s.peek,
       s.xray,
       s.hover,
@@ -386,6 +393,7 @@ export function Visualizer() {
           pinnedCount={s.pinned.length}
           onClearStamps={() => dispatch({ type: 'clearPins' })}
           chapters={life.chapters}
+          shares={shares}
           birthISO={life.birthISO}
           isSample={!isCustom}
           onChapters={onChapters}

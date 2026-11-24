@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { TOTAL, currentCell, chapterIndexForCells, lastWeekCells } from './life'
+import { addDays, addYears } from './dates'
+import { chapterShare } from './chapterShare'
+import { COLS, TOTAL, currentCell, chapterIndexForCells, lastWeekCells } from './life'
 import { marksFor } from './milestones'
-import { readout } from './narrative'
+import { readout, shareLine } from './narrative'
 import type { ReadoutInput } from './narrative'
 import { personaLife } from './personas'
 import { stampMath } from './stamps'
@@ -19,6 +21,7 @@ const base: ReadoutInput = {
   chapters: life.chapters,
   chapterIdx: chapterIndexForCells(life, TODAY),
   lastWeeks,
+  shares: life.chapters.map((c) => chapterShare(life.birthISO, c, TODAY)),
   xray: { forgotten: false, sleep: false, work: false },
   hoverCell: null,
   stamp: null,
@@ -109,5 +112,65 @@ describe('readout priority', () => {
     const ci = base.chapterIdx[cell]
     expect(ci).toBeGreaterThanOrEqual(0)
     expect(readout({ ...base, hoverCell: cell }).detail).toContain(`“${life.chapters[ci].label}”`)
+  })
+})
+
+describe('chapter share on hover', () => {
+  it('shows how an ended chapter thins out (the hometown: 46%, 30%, 22%)', () => {
+    const r = readout({ ...base, hoverCell: 5 * COLS + 3 })
+    expect(r.lead).toMatch(/seaside hometown/)
+    expect(r.share).toBe('46% of your life now · 30% at 60 · 22% at 80')
+  })
+
+  it('says an ongoing chapter only grows if it continues', () => {
+    const r = readout({ ...base, hoverCell: current - 3 })
+    expect(r.lead).toMatch(/Present chapter/)
+    expect(r.share).toMatch(/^1\d% of your life now · if it continues, \d\d% at 60 · \d\d% at 80$/)
+  })
+
+  it('keeps the line on a past mark inside a chapter', () => {
+    expect(readout({ ...base, hoverCell: marks[0].cell }).share).toMatch(/of your life now/)
+  })
+
+  it('stays off future weeks, the current week and the other readouts', () => {
+    expect(readout({ ...base, hoverCell: current + 10 }).share).toBeUndefined()
+    expect(readout({ ...base, hoverCell: current }).share).toBeUndefined()
+    expect(readout({ ...base, hoverCell: lastCell }).share).toBeUndefined()
+    expect(readout({ ...base, hoverCell: lastCell, stamp }).share).toBeUndefined()
+    expect(readout(base).share).toBeUndefined()
+  })
+
+  it('stays off a past week that belongs to no chapter', () => {
+    const gap = { ...life, chapters: [{ ...life.chapters[1] }] }
+    const r = readout({
+      ...base,
+      chapters: gap.chapters,
+      chapterIdx: chapterIndexForCells(gap, TODAY),
+      lastWeeks: lastWeekCells(gap, TODAY),
+      shares: gap.chapters.map((c) => chapterShare(gap.birthISO, c, TODAY)),
+      hoverCell: 5 * COLS,
+    })
+    expect(r.lead).toMatch(/before you were keeping track/)
+    expect(r.share).toBeUndefined()
+  })
+
+  it('drops ages already behind you', () => {
+    const old = personaLife('65', TODAY)
+    const s = chapterShare(old.birthISO, old.chapters[0], TODAY)
+    expect(shareLine(s!)).toMatch(/^\d+% of your life now · \d+% at 80$/)
+    const older = addYears(TODAY, -85)
+    const gone = chapterShare(
+      older,
+      { ...old.chapters[0], startISO: older, endISO: addDays(addYears(older, 18), -1) },
+      TODAY,
+    )
+    expect(shareLine(gone!)).toMatch(/^\d+% of your life now$/)
+  })
+
+  it('has a compact form for the chapter editor', () => {
+    expect(shareLine(base.shares[0]!, true)).toBe('46% now · 30% at 60 · 22% at 80')
+    expect(shareLine(base.shares[3]!, true)).toMatch(
+      /^1\d% now · if it continues, \d\d% at 60 · \d\d% at 80$/,
+    )
   })
 })

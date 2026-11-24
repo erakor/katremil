@@ -17,7 +17,7 @@ export function NarrativeReadout({
     return () => clearTimeout(t)
   }, [readout])
 
-  const heard = [spoken.figure, spoken.lead, spoken.remaining, spoken.detail]
+  const heard = [spoken.figure, spoken.lead, spoken.remaining, spoken.detail, spoken.share]
     .filter(Boolean)
     .join(' ')
 
@@ -51,6 +51,11 @@ export function NarrativeReadout({
             {readout.detail}
           </span>
         </p>
+        {readout.share && (
+          <p aria-hidden="true" className="num text-xs text-ink/80 sm:text-[13px]">
+            {readout.share}
+          </p>
+        )}
       </div>
       <p className="sr-only" aria-live="polite">
         {heard}

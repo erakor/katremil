@@ -1,3 +1,4 @@
+import type { ChapterShare } from './chapterShare'
 import { addYears, daysBetween, fmtInt, formatDate } from './dates'
 import { COLS, ROWS, TOTAL, cellDateAt, colOf, rowOf } from './life'
 import type { Chapter } from './life'
@@ -14,6 +15,8 @@ export interface Readout {
   figure?: string
   /** Time left, in the chosen unit. The view renders it as a button that cycles the unit. */
   remaining?: string
+  /** How the hovered chapter's share of your life changes (past chapter weeks only). */
+  share?: string
 }
 
 export interface ReadoutInput {
@@ -24,6 +27,8 @@ export interface ReadoutInput {
   chapterIdx: Int16Array
   /** Cell -> index of the chapter it closed. */
   lastWeeks: Map<number, number>
+  /** chapterShare for each chapter, in the same order (null before a chapter starts). */
+  shares: (ChapterShare | null)[]
   xray: XrayFlags
   hoverCell: number | null
   stamp: { label: string; weeks: number; anchor: number; math: StampMath } | null
@@ -34,6 +39,17 @@ export interface ReadoutInput {
 }
 
 const pct = (n: number) => (n >= 10 ? n.toFixed(0) : n >= 1 ? n.toFixed(1) : n.toFixed(2))
+
+/** `46% of your life now · 30% at 60 · 22% at 80`; compact drops "of your life". */
+export function shareLine(s: ChapterShare, compact = false): string {
+  const parts = [compact ? `${pct(s.now)}% now` : `${pct(s.now)}% of your life now`]
+  s.projections.forEach((p, k) => {
+    // A chapter still running is projected on the assumption that it keeps going. Say so.
+    const lead = k === 0 && s.grows ? 'if it continues, ' : ''
+    parts.push(`${lead}${pct(p.pct)}% at ${p.age}`)
+  })
+  return parts.join(' · ')
+}
 
 function stampCopy(s: NonNullable<ReadoutInput['stamp']>): Readout {
   const age = rowOf(s.anchor)
@@ -48,6 +64,8 @@ function hoverCopy(i: ReadoutInput, cell: number): Readout {
   const ci = i.chapterIdx[cell]
   const chapter = ci >= 0 ? i.chapters[ci].label : null
   const where = `Age ${rowOf(cell)}, week ${colOf(cell) + 1}`
+  const shareOf = ci >= 0 && cell < i.current ? i.shares[ci] : null
+  const share = shareOf ? { share: shareLine(shareOf) } : {}
   const mark = markAt(i.marks, cell)
   if (mark !== null) {
     const n = fmtInt(mark.week)
@@ -60,12 +78,13 @@ function hoverCopy(i: ReadoutInput, cell: number): Readout {
           : `The ${n}-week mark arrives on ${markDate}.`
     const of = chapter && cell <= i.current ? ` · “${chapter}”` : ''
     const away = cell > i.current ? ` · ${fmtInt(cell - i.current)} wk from now` : ''
-    return { lead, detail: `Week ${n} · ${where}${of}${away}` }
+    return { lead, detail: `Week ${n} · ${where}${of}${away}`, ...share }
   }
   if (cell < i.current) {
     return {
       lead: chapter ? `A week of “${chapter}”.` : 'A week before you were keeping track.',
       detail: `${where} · ${date} · behind you`,
+      ...share,
     }
   }
   if (cell === i.current) {

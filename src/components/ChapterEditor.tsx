@@ -2,18 +2,23 @@
 
 import { PIGMENTS } from '@/lib/pigments'
 import type { PigmentKey } from '@/lib/pigments'
+import type { ChapterShare } from '@/lib/chapterShare'
 import type { Chapter } from '@/lib/life'
+import { shareLine } from '@/lib/narrative'
 import { addYears, isValidISO } from '@/lib/dates'
 
 const field = 'num w-full rounded border border-hairline bg-white/[0.03] px-2 py-1 text-xs text-ink'
 
 export function ChapterEditor({
   chapters,
+  shares,
   birthISO,
   isSample,
   onChange,
 }: {
   chapters: Chapter[]
+  /** Same order as `chapters`. */
+  shares: (ChapterShare | null)[]
   birthISO: string
   isSample: boolean
   onChange: (next: Chapter[]) => void
@@ -42,7 +47,7 @@ export function ChapterEditor({
         {isSample && <span className="ml-2 text-[11px]">(changes become yours)</span>}
       </summary>
       <ul className="mt-3 space-y-4">
-        {chapters.map((c) => (
+        {chapters.map((c, k) => (
           <li key={c.id} className="space-y-2 border-l border-hairline pl-3">
             <input
               aria-label="Chapter name"
@@ -51,6 +56,11 @@ export function ChapterEditor({
               onChange={(e) => patch(c.id, { label: e.target.value })}
               className="w-full rounded border border-hairline bg-white/[0.03] px-2 py-1 text-sm text-ink"
             />
+            {shares[k] && (
+              <p className="num text-[11px] text-muted" title="Share of your life">
+                {shareLine(shares[k], true)}
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <label className="text-[11px] text-muted">
                 From

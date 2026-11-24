@@ -5,6 +5,7 @@ import { ChapterEditor } from '@/components/ChapterEditor'
 import { Segmented } from '@/components/ui/Segmented'
 import { Slider } from '@/components/ui/Slider'
 import { fmtInt } from '@/lib/dates'
+import type { ChapterShare } from '@/lib/chapterShare'
 import type { Chapter } from '@/lib/life'
 import { STAMPS } from '@/lib/stamps'
 import { CADENCES } from '@/lib/timesLeft'
@@ -37,6 +38,7 @@ export interface SidebarProps {
   pinnedCount: number
   onClearStamps: () => void
   chapters: Chapter[]
+  shares: (ChapterShare | null)[]
   birthISO: string
   isSample: boolean
   onChapters: (c: Chapter[]) => void
@@ -156,6 +158,7 @@ export function Sidebar(p: SidebarProps) {
           <Group title="Chapters">
             <ChapterEditor
               chapters={p.chapters}
+              shares={p.shares}
               birthISO={p.birthISO}
               isSample={p.isSample}
               onChange={p.onChapters}

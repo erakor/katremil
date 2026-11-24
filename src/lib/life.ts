@@ -84,10 +84,14 @@ export function lastWeekCells(life: Life, today: string): Map<number, number> {
   return out
 }
 
+/** Whole weeks from `startISO` through `endISO` (both days included), at least one. */
+export const spanWeeks = (startISO: string, endISO: string): number =>
+  Math.max(1, Math.floor((daysBetween(startISO, endISO) + 1) / 7))
+
 /** Length of each chapter in weeks (ongoing chapters run to today). */
 export function chapterWeeks(life: Life, today: string): { label: string; weeks: number }[] {
   return life.chapters.map((ch) => ({
     label: ch.label,
-    weeks: Math.max(1, Math.floor((daysBetween(ch.startISO, ch.endISO ?? today) + 1) / 7)),
+    weeks: spanWeeks(ch.startISO, ch.endISO ?? today),
   }))
 }
