@@ -2,7 +2,7 @@ import { addWeeks, fmtInt } from './dates'
 import { TOTAL, currentCell } from './life'
 
 /** The book's round number, in 1,000-week steps. */
-export const WEEK_MARKS = [1000, 2000, 3000, 4000] as const
+const WEEK_MARKS = [1000, 2000, 3000, 4000] as const
 
 export interface Mark {
   /** 1,000, 2,000, ... */
@@ -44,9 +44,9 @@ export const elapsedPct = (current: number): number =>
 export const formatPct = (p: number): string => `${(Math.floor(p * 10) / 10).toFixed(1)}%`
 
 /** Days in a mean solar year and month, and weeks in a mean year. */
-export const DAYS_PER_YEAR = 365.2425
-export const DAYS_PER_MONTH = DAYS_PER_YEAR / 12
-export const WEEKS_PER_YEAR = DAYS_PER_YEAR / 7
+const DAYS_PER_YEAR = 365.2425
+const DAYS_PER_MONTH = DAYS_PER_YEAR / 12
+const WEEKS_PER_YEAR = DAYS_PER_YEAR / 7
 
 export type RemainingUnit = 'weeks' | 'years' | 'months' | 'days'
 export const UNITS: RemainingUnit[] = ['weeks', 'years', 'months', 'days']
