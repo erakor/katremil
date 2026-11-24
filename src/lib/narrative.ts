@@ -1,13 +1,19 @@
-import { fmtInt, formatDate } from './dates'
-import { COLS, TOTAL, cellDateAt, colOf, rowOf } from './life'
+import { addYears, daysBetween, fmtInt, formatDate } from './dates'
+import { COLS, ROWS, TOTAL, cellDateAt, colOf, rowOf } from './life'
 import type { Chapter } from './life'
 import type { StampMath } from './stamps'
+import { elapsedPct, formatPct, formatSpan, markAt, nextMark } from './milestones'
+import type { Mark, RemainingUnit } from './milestones'
 import { FROSTED_ROWS, awakeUnclaimedWeeks } from './xray'
 import type { XrayFlags } from './xray'
 
 export interface Readout {
   lead: string
   detail: string
+  /** A large number shown beside the lead (the opening readout only). */
+  figure?: string
+  /** Time left, in the chosen unit. The view renders it as a button that cycles the unit. */
+  remaining?: string
 }
 
 export interface ReadoutInput {
@@ -22,6 +28,9 @@ export interface ReadoutInput {
   hoverCell: number | null
   stamp: { label: string; weeks: number; anchor: number; math: StampMath } | null
   times: { label: string; takeaway: string; past: number; future: number } | null
+  unit: RemainingUnit
+  /** The 1,000-week marks for this birth date (see marksFor). */
+  marks: Mark[]
 }
 
 const pct = (n: number) => (n >= 10 ? n.toFixed(0) : n >= 1 ? n.toFixed(1) : n.toFixed(2))
@@ -39,6 +48,20 @@ function hoverCopy(i: ReadoutInput, cell: number): Readout {
   const ci = i.chapterIdx[cell]
   const chapter = ci >= 0 ? i.chapters[ci].label : null
   const where = `Age ${rowOf(cell)}, week ${colOf(cell) + 1}`
+  const mark = markAt(i.marks, cell)
+  if (mark !== null) {
+    const n = fmtInt(mark.week)
+    const markDate = formatDate(mark.dateISO)
+    const lead =
+      cell < i.current
+        ? `You passed the ${n}-week mark on ${markDate}.`
+        : cell === i.current
+          ? `You are standing on the ${n}-week mark.`
+          : `The ${n}-week mark arrives on ${markDate}.`
+    const of = chapter && cell <= i.current ? ` · “${chapter}”` : ''
+    const away = cell > i.current ? ` · ${fmtInt(cell - i.current)} wk from now` : ''
+    return { lead, detail: `Week ${n} · ${where}${of}${away}` }
+  }
   if (cell < i.current) {
     return {
       lead: chapter ? `A week of “${chapter}”.` : 'A week before you were keeping track.',
@@ -99,9 +122,24 @@ export function readout(i: ReadoutInput): Readout {
   const x = xrayCopy(i)
   if (x) return x
 
-  const ahead = TOTAL - 1 - i.current
+  // Time left runs from the start of the next cell to the end of the grid, in real days.
+  const daysLeft =
+    i.current >= TOTAL - 1
+      ? 0
+      : daysBetween(cellDateAt(i.birthISO, i.current + 1), addYears(i.birthISO, ROWS))
+  const on = markAt(i.marks, i.current)
+  const next = nextMark(i.marks, i.current)
+  const nextCopy = next
+    ? `next 1,000-week mark: week ${fmtInt(next.week)}, ${formatDate(next.dateISO)}, in ${fmtInt(next.inWeeks)} wk`
+    : null
+  const last = i.marks[i.marks.length - 1]
+  const detail = on
+    ? [`you are on the ${fmtInt(on.week)}-week mark`, nextCopy].filter(Boolean).join(' · ')
+    : (nextCopy ?? `past the ${fmtInt(last.week)}-week mark`)
   return {
-    lead: 'Every square is one week. This is all of them.',
-    detail: `${fmtInt(i.current)} behind you · ${fmtInt(ahead)} ahead, give or take`,
+    figure: formatPct(elapsedPct(i.current)),
+    lead: 'of the grid is behind you. Every square is one week.',
+    remaining: `${formatSpan(daysLeft, i.unit)} left`,
+    detail,
   }
 }
