@@ -4,8 +4,8 @@ import { COLS, TOTAL } from './life'
 export const SLEEP_FRAC = 56 / 168
 /** Work: a 40h week, drawn as a band above sleep. */
 export const WORK_FRAC = 40 / 168
-export const WORK_FIRST_ROW = 22
-export const WORK_LAST_ROW = 61
+const WORK_FIRST_ROW = 22
+const WORK_LAST_ROW = 61
 /** Rows 0..2 are mostly forgotten. */
 export const FROSTED_ROWS = 3
 

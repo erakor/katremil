@@ -12,7 +12,7 @@ export const PIGMENTS = [
 
 export type PigmentKey = (typeof PIGMENTS)[number]['key']
 
-export const PIGMENT_KEYS: string[] = PIGMENTS.map((p) => p.key)
+const PIGMENT_KEYS: string[] = PIGMENTS.map((p) => p.key)
 
 export const AMBER = '#F2B544'
 export const GHOST = '#262B37'

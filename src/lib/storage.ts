@@ -68,7 +68,7 @@ const LEGACY_COLORS: Record<string, PigmentKey> = {
  * birth modes carry a birth date; a horizon-mode ledger has none to map, so it is skipped.
  * The v1 entry itself is left in place.
  */
-export function migrateV1(raw: unknown): Life | null {
+function migrateV1(raw: unknown): Life | null {
   if (!isObj(raw) || raw.version !== 1 || !isObj(raw.config) || !Array.isArray(raw.events))
     return null
   const { mode, anchorDate } = raw.config
