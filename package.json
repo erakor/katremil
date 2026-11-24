@@ -20,7 +20,7 @@
     "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@erakor/toolchain": "github:erakor/toolchain#v1.4.0",
+    "@erakor/toolchain": "github:erakor/toolchain#2234c80a5e2162b9ff6853304544715722461261",
     "@tailwindcss/turbopack": "4.3.5",
     "@types/node": "^26",
     "@types/react": "^19",

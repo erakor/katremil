@@ -26,7 +26,7 @@ export function NarrativeReadout({
       {readout.figure && (
         <p
           aria-hidden="true"
-          className="font-display shrink-0 text-4xl leading-none text-amber tabular-nums sm:text-5xl"
+          className="shrink-0 font-display text-4xl leading-none text-amber tabular-nums sm:text-5xl"
         >
           {readout.figure}
         </p>
