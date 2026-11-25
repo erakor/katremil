@@ -1,3 +1,5 @@
-import base from '@erakor/toolchain/oxfmt'
+import base, { tailwind } from '@erakor/toolchain/oxfmt'
 
-export default base
+const config = { ...base, sortTailwindcss: tailwind('src/app/globals.css') }
+
+export default config
